@@ -1,10 +1,10 @@
-import type { APIGatewayProxyHandler, APIGatewayProxyResult } from "aws-lambda";
+import type { APIGatewayProxyHandler, APIGatewayProxyResult, APIGatewayEvent } from "aws-lambda";
 import * as AWS from 'aws-sdk';
 
 const rekognition = new AWS.Rekognition();
 
-export const handler: APIGatewayProxyHandler = async (event) => {
-    const httpMethod = event.httpMethod; // Obtiene el método HTTP de la solicitud
+export const handler: APIGatewayProxyHandler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
+    const httpMethod = event.httpMethod;
     console.log("------HTTP Method:", httpMethod);
     console.log("------event", event);
 
@@ -17,7 +17,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         case "POST":
             response = await createSessionLiveness(event);
             break;
-        // Agrega más casos para otros métodos HTTP si es necesario
         default:
             response = handleUnknownRequest(event);
             break;
@@ -27,8 +26,19 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 };
 
 // Función para manejar solicitudes GET
-const getFaceLivenessSession = async (event: any): Promise<APIGatewayProxyResult> => {
-    const sessionId = event.pathParameters.sessionId;
+const getFaceLivenessSession = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
+    const sessionId = event.pathParameters?.sessionId;
+    if (!sessionId) {
+        return {
+            statusCode: 400,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "*"
+            },
+            body: JSON.stringify({ error: "Missing sessionId in path parameters" })
+        };
+    }
+    
     try {
         const params = {
             SessionId: sessionId
@@ -64,18 +74,25 @@ const getFaceLivenessSession = async (event: any): Promise<APIGatewayProxyResult
 };
 
 // Función para manejar solicitudes POST
-const createSessionLiveness = async (event: any): Promise<APIGatewayProxyResult> => {
+const createSessionLiveness = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
+   console.log('-----------createSessionLiveness')
     try {
+
         const params = {
-            ClientRequestToken: `token-${Date.now()}`, // Cambia esto según sea necesario
-            FaceLivenessConfig: {
-                // Configura los parámetros según sea necesario
-                LivenessType: 'LIVENESS',
-                TimeoutSeconds: 60
+            //ClientRequestToken: 'token-único-para-cada-solicitud', // Opcional pero recomendado para idempotencia
+            //KmsKeyId: 'tu-kms-key-id', // Opcional, para encriptar las imágenes almacenadas
+            Settings: { // Opcional, para configurar el almacenamiento de imágenes y el límite de imágenes de auditoría
+              AuditImagesLimit: 2, // Puedes especificar de 0 a 4
+              OutputConfig: {
+                S3Bucket: 'video-signature3-images',
+                S3KeyPrefix: 'liveness-sessions/'
+              }
             }
-        };
+          };
 
         const session = await rekognition.createFaceLivenessSession(params).promise();
+        console.log('la session creada en backend: ', session);
+
         return {
             statusCode: 200,
             headers: {
@@ -85,7 +102,7 @@ const createSessionLiveness = async (event: any): Promise<APIGatewayProxyResult>
             body: JSON.stringify(session)
         };
     } catch (error: unknown) {
-        console.error('Error creating session:', error);
+        console.error('Error creating liveness session:', error);
 
         let errorMessage = 'Unknown error';
         if (error instanceof Error) {
@@ -106,13 +123,13 @@ const createSessionLiveness = async (event: any): Promise<APIGatewayProxyResult>
 };
 
 // Función para manejar solicitudes desconocidas
-const handleUnknownRequest = (event: any): APIGatewayProxyResult => {
+const handleUnknownRequest = (event: APIGatewayEvent): APIGatewayProxyResult => {
     return {
         statusCode: 405, // Método no permitido
         headers: {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Headers": "*",
         },
-        body: JSON.stringify(`-----Method ${event.httpMethod} not allowed`),
+        body: JSON.stringify(`Method ${event.httpMethod} not allowed`),
     };
 };

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Schema } from "../amplify/data/resource";
-import { generateClient } from "aws-amplify/data";
+import { generateClient, post } from "aws-amplify/data";
 import { get } from 'aws-amplify/api';
 
 const client = generateClient<Schema>();
@@ -34,7 +34,7 @@ function App() {
   }
   async function load() {
     try {
-      const restOperation = get({
+      const restOperation = post({
         apiName: 'myRestApi',
         path: 'session'
       });
