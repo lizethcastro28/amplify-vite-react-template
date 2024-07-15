@@ -7,23 +7,23 @@ const client = generateClient<Schema>();
 
 function App() {
   const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
-  const [cadena, setCadena] =  useState<string>("");
-  
+  const [cadena, setCadena] = useState<string>("");
+
   useEffect(() => {
     client.models.Todo.observeQuery().subscribe({
       next: (data) => setTodos([...data.items]),
     });
   }, []);
-  
+
   async function readStream(stream: ReadableStream<Uint8Array>): Promise<string> {
     const reader = stream.getReader();
     const decoder = new TextDecoder();
     let result = '';
 
     while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        result += decoder.decode(value, { stream: true });
+      const { done, value } = await reader.read();
+      if (done) break;
+      result += decoder.decode(value, { stream: true });
     }
 
     result += decoder.decode(); // Decodificar los últimos datos
@@ -32,26 +32,26 @@ function App() {
   async function createTodo() {
     client.models.Todo.create({ content: window.prompt("Todo content") });
   }
-  async function load(){
+  async function load() {
     try {
-      const restOperation = get({ 
+      const restOperation = get({
         apiName: 'myRestApi',
-        path: 'items' 
+        path: 'items'
       });
       const response = await restOperation.response as unknown as Response;
-      
+
       if (response.body) {
         const responseBody = await readStream(response.body);
-        setCadena(responseBody),
+        setCadena(responseBody);
         console.log('GET call succeeded: ', responseBody);
-    } else {
+      } else {
         console.log('GET call succeeded but response body is empty');
-    }
+      }
     } catch (error) {
       console.log('GET call failed: ');
     }
-    
-  } 
+
+  }
   load();
   return (
     <main>
@@ -65,8 +65,8 @@ function App() {
       <div>
         🥳 App successfully hosted. Try creating a new todo. Ronald Niño
         <br />
-         Respuesta de un API {cadena}
-        <br />   
+        Respuesta de un API {cadena}
+        <br />
         <a href="https://docs.amplify.aws/react/start/quickstart/#make-frontend-updates">
           Review next step of this tutorial.
         </a>

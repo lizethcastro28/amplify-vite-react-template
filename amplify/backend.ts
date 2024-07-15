@@ -44,20 +44,20 @@ const lambdaIntegration = new LambdaIntegration(
 );
 
 // create a new resource path with IAM authorization
-const itemsPath = myRestApi.root.addResource("items", {
+const sessionPath = myRestApi.root.addResource("session", {
   defaultMethodOptions: {
     authorizationType: AuthorizationType.IAM,
   },
 });
 
 // add methods you would like to create to the resource path
-itemsPath.addMethod("GET", lambdaIntegration);
-itemsPath.addMethod("POST", lambdaIntegration);
-itemsPath.addMethod("DELETE", lambdaIntegration);
-itemsPath.addMethod("PUT", lambdaIntegration);
+sessionPath.addMethod("GET", lambdaIntegration);
+sessionPath.addMethod("POST", lambdaIntegration);
+//sessionPath.addMethod("DELETE", lambdaIntegration);
+//sessionPath.addMethod("PUT", lambdaIntegration);
 
 // add a proxy resource path to the API
-itemsPath.addProxy({
+sessionPath.addProxy({
   anyMethod: true,
   defaultIntegration: lambdaIntegration,
 });
@@ -80,8 +80,8 @@ const apiRestPolicy = new Policy(apiStack, "RestApiPolicy", {
     new PolicyStatement({
       actions: ["execute-api:Invoke"],
       resources: [
-        `${myRestApi.arnForExecuteApi("*", "/items", "dev")}`,
-        `${myRestApi.arnForExecuteApi("*", "/items/*", "dev")}`,
+        `${myRestApi.arnForExecuteApi("*", "/session", "dev")}`,
+        `${myRestApi.arnForExecuteApi("*", "/session/*", "dev")}`,
         `${myRestApi.arnForExecuteApi("*", "/cognito-auth-path", "dev")}`,
       ],
     }),
