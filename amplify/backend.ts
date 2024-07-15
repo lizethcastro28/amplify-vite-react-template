@@ -85,6 +85,14 @@ const apiRestPolicy = new Policy(apiStack, "RestApiPolicy", {
         `${myRestApi.arnForExecuteApi("*", "/cognito-auth-path", "dev")}`,
       ],
     }),
+    new PolicyStatement({
+      actions: [
+        "rekognition:CreateFaceLivenessSession",
+        "rekognition:StartFaceLivenessSession",
+        "rekognition:GetFaceLivenessSessionResults",
+      ],
+      resources: ["*"],
+    }),
   ],
 });
 
@@ -108,20 +116,3 @@ backend.addOutput({
     },
   },
 });
-
-const livenessStack = backend.createStack("liveness-stack");
-
-const livenessPolicy = new Policy(livenessStack, "LivenessPolicy", {
-  statements: [
-    new PolicyStatement({
-      actions: [
-        "rekognition:CreateFaceLivenessSession",
-        "rekognition:StartFaceLivenessSession",
-        "rekognition:GetFaceLivenessSessionResults", // Agregando la acción para obtener resultados de sesión
-      ],
-      resources: ["*"],
-    }),
-  ],
-});
-backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(livenessPolicy); // allows guest user access
-backend.auth.resources.authenticatedUserIamRole.attachInlinePolicy(livenessPolicy); // allows logged in user access

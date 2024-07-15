@@ -75,7 +75,7 @@ const getFaceLivenessSession = async (event: APIGatewayEvent): Promise<APIGatewa
 
 // Función para manejar solicitudes POST
 const createSessionLiveness = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
-   console.log('-----------createSessionLiveness------')
+   console.log('-----------......createSessionLiveness------')
     try {
         const clientRequestToken = event.requestContext.requestId; 
 
