@@ -36,7 +36,7 @@ function App() {
     try {
       const restOperation = get({
         apiName: 'myRestApi',
-        path: 'items'
+        path: 'session'
       });
       const response = await restOperation.response as unknown as Response;
 
