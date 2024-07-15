@@ -114,7 +114,11 @@ const livenessStack = backend.createStack("liveness-stack");
 const livenessPolicy = new Policy(livenessStack, "LivenessPolicy", {
   statements: [
     new PolicyStatement({
-      actions: ["rekognition:StartFaceLivenessSession"],
+      actions: [
+        "rekognition:CreateFaceLivenessSession",
+        "rekognition:StartFaceLivenessSession",
+        "rekognition:GetFaceLivenessSessionResults", // Agregando la acción para obtener resultados de sesión
+      ],
       resources: ["*"],
     }),
   ],
