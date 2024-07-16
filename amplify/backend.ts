@@ -7,7 +7,7 @@ import {
   LambdaIntegration,
   RestApi,
 } from "aws-cdk-lib/aws-apigateway";
-import { Policy, PolicyStatement } from "aws-cdk-lib/aws-iam";
+import { Policy, PolicyStatement, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 import { myApiFunction } from "./functions/api-function/resource";
 import { auth } from "./auth/resource";
 import { data } from "./data/resource";
@@ -50,8 +50,6 @@ const sessionPath = myRestApi.root.addResource("session", {
 // add methods you would like to create to the resource path
 sessionPath.addMethod("GET", lambdaIntegration);
 sessionPath.addMethod("POST", lambdaIntegration);
-//sessionPath.addMethod("DELETE", lambdaIntegration);
-//sessionPath.addMethod("PUT", lambdaIntegration);
 
 // add a proxy resource path to the API
 sessionPath.addProxy({
@@ -84,6 +82,7 @@ const apiRestPolicy = new Policy(apiStack, "RestApiPolicy", {
     })
   ],
 });
+
 // attach the policy to the authenticated and unauthenticated IAM roles
 backend.auth.resources.authenticatedUserIamRole.attachInlinePolicy(
   apiRestPolicy
@@ -92,7 +91,8 @@ backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(
   apiRestPolicy
 );
 
-const livenessPolicy = new Policy(apiStack, "LivenessPolicy", {
+// create a new policy for Rekognition and S3 access
+const rekognitionAndS3Policy = new Policy(apiStack, "RekognitionAndS3Policy", {
   statements: [
     new PolicyStatement({
       actions: [
@@ -112,8 +112,10 @@ const livenessPolicy = new Policy(apiStack, "LivenessPolicy", {
     }),
   ],
 });
-backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(livenessPolicy); // allows guest user access
-backend.auth.resources.authenticatedUserIamRole.attachInlinePolicy(livenessPolicy); 
+
+// attach the policy to the Lambda execution role
+const lambdaRole = backend.myApiFunction.resources.lambda.role as Role;
+lambdaRole.attachInlinePolicy(rekognitionAndS3Policy);
 
 // add outputs to the configuration file
 backend.addOutput({
