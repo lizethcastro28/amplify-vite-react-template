@@ -95,10 +95,10 @@ backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(
 const rekognitionAndS3Policy = new Policy(apiStack, "RekognitionAndS3Policy", {
   statements: [
     new PolicyStatement({
-      actions: ["*"
-        //"rekognition:CreateFaceLivenessSession",
-       // "rekognition:StartFaceLivenessSession",
-       // "rekognition:GetFaceLivenessSessionResults",
+      actions: [
+        "rekognition:CreateFaceLivenessSession",
+        "rekognition:StartFaceLivenessSession",
+        "rekognition:GetFaceLivenessSessionResults",
       ],
       resources: ["*"],
     }),
@@ -129,3 +129,15 @@ backend.addOutput({
     },
   },
 });
+const livenessStack = backend.createStack("liveness-stack");
+
+const livenessPolicy = new Policy(livenessStack, "LivenessPolicy", {
+  statements: [
+    new PolicyStatement({
+      actions: ["rekognition:StartFaceLivenessSession"],
+      resources: ["*"],
+    }),
+  ],
+});
+backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(livenessPolicy); // allows guest user access
+backend.auth.resources.authenticatedUserIamRole.attachInlinePolicy(livenessPolicy);
