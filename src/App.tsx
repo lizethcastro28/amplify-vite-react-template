@@ -63,7 +63,7 @@ function App() {
         ))}
       </ul>
       <div>
-        🥳 Liveness Pruebas
+        🥳 Liveness Pruebas de API
         <br />
         Respuesta de un API {cadena}
         <br />
