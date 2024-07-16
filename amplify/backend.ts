@@ -95,10 +95,10 @@ backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(
 const rekognitionAndS3Policy = new Policy(apiStack, "RekognitionAndS3Policy", {
   statements: [
     new PolicyStatement({
-      actions: [
-        "rekognition:CreateFaceLivenessSession",
-        "rekognition:StartFaceLivenessSession",
-        "rekognition:GetFaceLivenessSessionResults",
+      actions: ["*"
+        //"rekognition:CreateFaceLivenessSession",
+       // "rekognition:StartFaceLivenessSession",
+       // "rekognition:GetFaceLivenessSessionResults",
       ],
       resources: ["*"],
     }),

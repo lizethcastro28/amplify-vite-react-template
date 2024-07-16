@@ -28,6 +28,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayEvent): P
 // Función para manejar solicitudes GET
 const getFaceLivenessSession = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
     const sessionId = event.pathParameters?.sessionId;
+    console.log('-------getFaceLivenessSession', sessionId);
     if (!sessionId) {
         return {
             statusCode: 400,

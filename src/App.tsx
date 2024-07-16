@@ -1,18 +1,39 @@
-import { useEffect, useState } from "react";
-import type { Schema } from "../amplify/data/resource";
-import { generateClient, post } from "aws-amplify/data";
-//import { post } from 'aws-amplify/api';
-
-const client = generateClient<Schema>();
+import React from 'react';
+import { FaceLivenessDetector } from '@aws-amplify/ui-react-liveness';
+import { Loader, ThemeProvider } from '@aws-amplify/ui-react';
+import { post } from "aws-amplify/data";
+import '@aws-amplify/ui-react/styles.css';
 
 function App() {
-  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
-  const [cadena, setCadena] = useState<string>("");
+  const [loading, setLoading] = React.useState<boolean>(true);
+  const [createLivenessApiData, setCreateLivenessApiData] = React.useState<{
+    sessionId: string;
+  } | null>(null);
 
-  useEffect(() => {
-    client.models.Todo.observeQuery().subscribe({
-      next: (data) => setTodos([...data.items]),
-    });
+  React.useEffect(() => {
+    const fetchCreateLiveness = async () => {
+      try {
+        const restOperation = post({
+          apiName: 'myRestApi',
+          path: 'session'
+        });
+        const response = await restOperation.response as unknown as Response;
+
+        if (response.body) {
+          const responseBody = await readStream(response.body);
+          const sessionData = JSON.parse(responseBody); // Parse JSON string to object
+          setCreateLivenessApiData({ sessionId: sessionData.sessionId }); // Assuming sessionData contains sessionId
+          setLoading(false);
+          console.log('POST call succeeded: ', sessionData);
+        } else {
+          console.log('POST call succeeded but response body is empty');
+        }
+      } catch (error) {
+        console.log('------POST call failed: ', error);
+      }
+    };
+
+    fetchCreateLiveness();
   }, []);
 
   async function readStream(stream: ReadableStream<Uint8Array>): Promise<string> {
@@ -29,50 +50,49 @@ function App() {
     result += decoder.decode(); // Decodificar los últimos datos
     return result;
   }
-  async function createTodo() {
-    client.models.Todo.create({ content: window.prompt("Todo content") });
-  }
-  async function load() {
-    try {
-      const restOperation = post({
-        apiName: 'myRestApi',
-        path: 'session'
-      });
-      const response = await restOperation.response as unknown as Response;
 
-      if (response.body) {
-        const responseBody = await readStream(response.body);
-        setCadena(responseBody);
-        console.log('GET call succeeded: ', responseBody);
+  const handleAnalysisComplete = async () => {
+    /*
+     * This should be replaced with a real call to your own backend API
+     */
+    if (createLivenessApiData) {
+      const response = await fetch(
+        `/api/get?sessionId=${createLivenessApiData.sessionId}`
+      );
+      const data = await response.json();
+
+      /*
+       * Note: The isLive flag is not returned from the GetFaceLivenessSession API
+       * This should be returned from your backend based on the score that you
+       * get in response. Based on the return value of your API you can determine what to render next.
+       * Any next steps from an authorization perspective should happen in your backend and you should not rely
+       * on this value for any auth related decisions.
+       */
+      if (data.isLive) {
+        console.log('User is live');
       } else {
-        console.log('GET call succeeded but response body is empty');
+        console.log('User is not live');
       }
-    } catch (error) {
-      console.log('------GET call failed: ');
+    } else {
+      console.log('No sessionId available');
     }
+  };
 
-  }
-  load();
   return (
-    <main>
-      <h1>Lista de Nombres</h1>
-      <button onClick={createTodo}>+ new</button>
-      <ul>
-        {todos.map((todo) => (
-          <li key={todo.id}>{todo.content}</li>
-        ))}
-      </ul>
-      <div>
-        🥳 Liveness Pruebas de API
-        <br />
-        Respuesta de un API {cadena}
-        <br />
-        <a href="https://docs.amplify.aws/react/start/quickstart/#make-frontend-updates">
-          Review next step of this tutorial.
-        </a>
-      </div>
-    </main>
+    <ThemeProvider>
+      {loading ? (
+        <Loader />
+      ) : (
+        <FaceLivenessDetector
+          sessionId={createLivenessApiData?.sessionId || ""}
+          region="us-east-1"
+          onAnalysisComplete={handleAnalysisComplete}
+          onError={(error) => {
+            console.error(error);
+          }}
+        />
+      )}
+    </ThemeProvider>
   );
 }
-
-export default App;
+export default App; 
