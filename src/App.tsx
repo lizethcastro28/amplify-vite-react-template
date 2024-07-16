@@ -48,7 +48,7 @@ function App() {
         console.log('GET call succeeded but response body is empty');
       }
     } catch (error) {
-      console.log('GET call failed: ');
+      console.log('------GET call failed: ');
     }
 
   }

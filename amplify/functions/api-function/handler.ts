@@ -75,7 +75,7 @@ const getFaceLivenessSession = async (event: APIGatewayEvent): Promise<APIGatewa
 
 // Función para manejar solicitudes POST
 const createSessionLiveness = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
-   console.log('-----------......createSessionLiveness------')
+   console.log('----------->>>>createSessionLiveness------')
     try {
         const clientRequestToken = event.requestContext.requestId; 
 
@@ -92,7 +92,7 @@ const createSessionLiveness = async (event: APIGatewayEvent): Promise<APIGateway
           };
 
         const session = await rekognition.createFaceLivenessSession(params).promise();
-        console.log('la session creada en backend: ', session);
+        console.log('-----la session creada en backend: ', session);
 
         return {
             statusCode: 200,

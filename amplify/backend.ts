@@ -84,7 +84,19 @@ const apiRestPolicy = new Policy(apiStack, "RestApiPolicy", {
         `${myRestApi.arnForExecuteApi("*", "/session/*", "dev")}`,
         `${myRestApi.arnForExecuteApi("*", "/cognito-auth-path", "dev")}`,
       ],
-    }),
+    })
+  ],
+});
+// attach the policy to the authenticated and unauthenticated IAM roles
+backend.auth.resources.authenticatedUserIamRole.attachInlinePolicy(
+  apiRestPolicy
+);
+backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(
+  apiRestPolicy
+);
+
+const livenessPolicy = new Policy(apiStack, "LivenessPolicy", {
+  statements: [
     new PolicyStatement({
       actions: [
         "rekognition:CreateFaceLivenessSession",
@@ -95,14 +107,9 @@ const apiRestPolicy = new Policy(apiStack, "RestApiPolicy", {
     }),
   ],
 });
+backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(livenessPolicy); // allows guest user access
+backend.auth.resources.authenticatedUserIamRole.attachInlinePolicy(livenessPolicy); 
 
-// attach the policy to the authenticated and unauthenticated IAM roles
-backend.auth.resources.authenticatedUserIamRole.attachInlinePolicy(
-  apiRestPolicy
-);
-backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(
-  apiRestPolicy
-);
 
 // add outputs to the configuration file
 backend.addOutput({
