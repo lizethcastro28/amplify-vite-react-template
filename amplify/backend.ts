@@ -1,5 +1,3 @@
-
-
 import { defineBackend } from "@aws-amplify/backend";
 import { Stack } from "aws-cdk-lib";
 import {
@@ -19,7 +17,6 @@ const backend = defineBackend({
   data,
   myApiFunction,
 });
-
 
 // create a new API stack
 const apiStack = backend.createStack("api-stack");
@@ -53,8 +50,6 @@ const sessionPath = myRestApi.root.addResource("session", {
 // add methods you would like to create to the resource path
 sessionPath.addMethod("GET", lambdaIntegration);
 sessionPath.addMethod("POST", lambdaIntegration);
-//sessionPath.addMethod("DELETE", lambdaIntegration);
-//sessionPath.addMethod("PUT", lambdaIntegration);
 
 // add a proxy resource path to the API
 sessionPath.addProxy({
@@ -87,6 +82,7 @@ const apiRestPolicy = new Policy(apiStack, "RestApiPolicy", {
     })
   ],
 });
+
 // attach the policy to the authenticated and unauthenticated IAM roles
 backend.auth.resources.authenticatedUserIamRole.attachInlinePolicy(
   apiRestPolicy
@@ -95,21 +91,16 @@ backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(
   apiRestPolicy
 );
 
-const livenessPolicy = new Policy(apiStack, "LivenessPolicy", {
-  statements: [
-    new PolicyStatement({
-      actions: [
-        "rekognition:CreateFaceLivenessSession",
-        "rekognition:StartFaceLivenessSession",
-        "rekognition:GetFaceLivenessSessionResults",
-      ],
-      resources: ["*"],
-    }),
+// Add Rekognition permissions to the existing Lambda function
+const rekognitionPolicy = new PolicyStatement({
+  actions: [
+    "rekognition:CreateFaceLivenessSession",
+    "rekognition:StartFaceLivenessSession",
+    "rekognition:GetFaceLivenessSessionResults",
   ],
+  resources: ["*"],
 });
-backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(livenessPolicy); // allows guest user access
-backend.auth.resources.authenticatedUserIamRole.attachInlinePolicy(livenessPolicy); 
-
+backend.myApiFunction.resources.lambda.addToRolePolicy(rekognitionPolicy);
 
 // add outputs to the configuration file
 backend.addOutput({

@@ -63,7 +63,7 @@ function App() {
         ))}
       </ul>
       <div>
-        🥳 App successfully hosted. Try creating a new todo. Ronald Niño
+        🥳 Liveness Pruebas
         <br />
         Respuesta de un API {cadena}
         <br />
