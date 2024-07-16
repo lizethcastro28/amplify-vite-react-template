@@ -103,7 +103,8 @@ const createSessionLiveness = async (event: APIGatewayEvent): Promise<APIGateway
             body: JSON.stringify(session)
         };
     } catch (error: unknown) {
-        console.error('Error creating liveness session:', error);
+        console.log('Entra en el catch....');
+        console.error('-----Error creating liveness session:', error);
 
         let errorMessage = 'Unknown error';
         if (error instanceof Error) {
