@@ -121,5 +121,6 @@ const livenessPolicy = new Policy(livenessStack, "LivenessPolicy", {
     }),
   ],
 });
+
 backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(livenessPolicy);
 backend.auth.resources.authenticatedUserIamRole.attachInlinePolicy(livenessPolicy);
