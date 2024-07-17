@@ -7,7 +7,7 @@ import {
   LambdaIntegration,
   RestApi,
 } from "aws-cdk-lib/aws-apigateway";
-import { Policy, PolicyStatement, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
+import { Policy, PolicyStatement, Role } from "aws-cdk-lib/aws-iam";
 import { myApiFunction } from "./functions/api-function/resource";
 import { auth } from "./auth/resource";
 import { data } from "./data/resource";
@@ -47,8 +47,15 @@ const sessionPath = myRestApi.root.addResource("session", {
   },
 });
 
+// add a resource path that accepts a parameter
+const sessionIdResource = sessionPath.addResource("{sessionId}", {
+  defaultMethodOptions: {
+    authorizationType: AuthorizationType.IAM,
+  },
+});
+
 // add methods you would like to create to the resource path
-sessionPath.addMethod("GET", lambdaIntegration);
+sessionIdResource.addMethod("GET", lambdaIntegration);
 sessionPath.addMethod("POST", lambdaIntegration);
 
 // add a proxy resource path to the API
@@ -77,6 +84,7 @@ const apiRestPolicy = new Policy(apiStack, "RestApiPolicy", {
       resources: [
         `${myRestApi.arnForExecuteApi("*", "/session", "dev")}`,
         `${myRestApi.arnForExecuteApi("*", "/session/*", "dev")}`,
+        `${myRestApi.arnForExecuteApi("*", "/session/{sessionId}", "dev")}`,
         `${myRestApi.arnForExecuteApi("*", "/cognito-auth-path", "dev")}`,
       ],
     })
