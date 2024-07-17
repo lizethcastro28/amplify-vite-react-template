@@ -21,8 +21,16 @@ function App() {
 
         if (response.body) {
           const responseBody = await readStream(response.body);
-          const sessionData = JSON.parse(responseBody); // Parse JSON string to object
-          setCreateLivenessApiData({ sessionId: sessionData.sessionId }); // Assuming sessionData contains sessionId
+          const sessionData = JSON.parse(responseBody);
+          console.log('Response Body:', sessionData); // Log para verificar los datos
+          
+          if (sessionData && sessionData.SessionId) {
+            setCreateLivenessApiData({ sessionId: sessionData.SessionId });
+            console.log('Session ID set:', sessionData.SessionId);
+          } else {
+            console.error('Invalid session data received:', sessionData);
+          }
+          
           setLoading(false);
           console.log('POST call succeeded: ', sessionData);
         } else {
@@ -52,27 +60,30 @@ function App() {
   }
 
   const handleAnalysisComplete = async () => {
-    /*
-     * This should be replaced with a real call to your own backend API
-     */
     if (createLivenessApiData) {
-      const response = await fetch(
-        `/api/get?sessionId=${createLivenessApiData.sessionId}`
-      );
-      const data = await response.json();
+      try {
+        const restOperation = post({
+          apiName: 'myRestApi',
+          path: `session?sessionId=${createLivenessApiData.sessionId}`
+        });
+        const response = await restOperation.response as unknown as Response;
 
-      /*
-       * Note: The isLive flag is not returned from the GetFaceLivenessSession API
-       * This should be returned from your backend based on the score that you
-       * get in response. Based on the return value of your API you can determine what to render next.
-       * Any next steps from an authorization perspective should happen in your backend and you should not rely
-       * on this value for any auth related decisions.
-       */
-      if (data.isLive) {
-        console.log('User is live');
-      } else {
-        console.log('User is not live');
+        if (response.body) {
+          const responseBody = await readStream(response.body);
+          const data = JSON.parse(responseBody); // Parse JSON string to object
+          console.log('-------Response Body:', data); // Log para verificar los datos
+          if (data.isLive) {
+            console.log('---------User is live');
+          } else {
+            console.log('-------User is not live');
+          }
+        } else {
+          console.log('POST call succeeded but response body is empty');
+        }
+      } catch (error) {
+        console.log('------POST call failed: ', error);
       }
+      
     } else {
       console.log('No sessionId available');
     }
@@ -88,11 +99,12 @@ function App() {
           region="us-east-1"
           onAnalysisComplete={handleAnalysisComplete}
           onError={(error) => {
-            console.error(error);
+            console.error('FaceLivenessDetector error:', error); // Log para verificar los errores
           }}
         />
       )}
     </ThemeProvider>
   );
 }
-export default App; 
+
+export default App;

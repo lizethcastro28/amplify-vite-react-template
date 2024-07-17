@@ -45,6 +45,7 @@ const getFaceLivenessSession = async (event: APIGatewayEvent): Promise<APIGatewa
             SessionId: sessionId
         };
         const session = await rekognition.getFaceLivenessSessionResults(params).promise();
+        console.log('----->>>>getFaceLivenessSessionResults: ', session);
         return {
             statusCode: 200,
             headers: {
