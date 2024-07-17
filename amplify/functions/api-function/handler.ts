@@ -31,7 +31,11 @@ const getFaceLivenessSession = async (event: APIGatewayEvent): Promise<APIGatewa
     console.log('-------getFaceLivenessSession event: ', event);
 
     // Verificar si pathParameters está presente y tiene sessionId
-    const sessionId = event.pathParameters?.sessionId;
+    console.log('-----------el path: ', event.path);
+    const path = event.path;
+    const parts = path.split('/'); // Divide el path en partes separadas por '/'
+    const sessionId = parts[2];
+    console.log('-------......el sessionId: ', sessionId)
 
     if (!sessionId) {
         return {
@@ -43,7 +47,7 @@ const getFaceLivenessSession = async (event: APIGatewayEvent): Promise<APIGatewa
             body: JSON.stringify({ error: "Missing sessionId in path parameters" })
         };
     }
-    
+
     try {
         const params = {
             SessionId: sessionId
@@ -82,21 +86,21 @@ const getFaceLivenessSession = async (event: APIGatewayEvent): Promise<APIGatewa
 
 // Función para manejar solicitudes POST
 const createSessionLiveness = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
-   console.log('----------->>>......createSessionLiveness------')
+    console.log('----------->>>......createSessionLiveness------')
     try {
-        const clientRequestToken = event.requestContext.requestId; 
+        const clientRequestToken = event.requestContext.requestId;
 
         const params = {
             ClientRequestToken: clientRequestToken, // Opcional pero recomendado para idempotencia
             //KmsKeyId: 'tu-kms-key-id', // Opcional, para encriptar las imágenes almacenadas
             Settings: { // Opcional, para configurar el almacenamiento de imágenes y el límite de imágenes de auditoría
-              AuditImagesLimit: 2, // Puedes especificar de 0 a 4
-              OutputConfig: {
-                S3Bucket: 'video-signature3-images',
-                S3KeyPrefix: 'liveness-sessions/'
-              }
+                AuditImagesLimit: 2, // Puedes especificar de 0 a 4
+                OutputConfig: {
+                    S3Bucket: 'video-signature3-images',
+                    S3KeyPrefix: 'liveness-sessions/'
+                }
             }
-          };
+        };
 
         const session = await rekognition.createFaceLivenessSession(params).promise();
         console.log('--------------->......la session creada en backend: ', session);
