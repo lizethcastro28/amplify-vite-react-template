@@ -79,10 +79,10 @@ function App() {
             console.log('-------User is not live');
           }
         } else {
-          console.log('POST call succeeded but response body is empty');
+          console.log('GET call succeeded but response body is empty');
         }
       } catch (error) {
-        console.log('------POST call failed: ', error);
+        console.log('------GET call failed: ', error);
       }
       
     } else {
