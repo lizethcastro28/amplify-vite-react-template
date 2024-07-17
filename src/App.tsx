@@ -1,7 +1,7 @@
 import React from 'react';
 import { FaceLivenessDetector } from '@aws-amplify/ui-react-liveness';
 import { Loader, ThemeProvider } from '@aws-amplify/ui-react';
-import { post } from "aws-amplify/data";
+import { get, post } from "aws-amplify/data";
 import '@aws-amplify/ui-react/styles.css';
 
 function App() {
@@ -62,7 +62,7 @@ function App() {
   const handleAnalysisComplete = async () => {
     if (createLivenessApiData) {
       try {
-        const restOperation = post({
+        const restOperation = get({
           apiName: 'myRestApi',
           path: `session?sessionId=${createLivenessApiData.sessionId}`
         });
