@@ -2,9 +2,10 @@ import { defineBackend } from "@aws-amplify/backend";
 import { Stack } from "aws-cdk-lib";
 import {
   AuthorizationType,
+  CognitoUserPoolsAuthorizer,
+  Cors,
   LambdaIntegration,
   RestApi,
-  Cors,
 } from "aws-cdk-lib/aws-apigateway";
 import { Policy, PolicyStatement, Role } from "aws-cdk-lib/aws-iam";
 import { myApiFunction } from "./functions/api-function/resource";
@@ -17,10 +18,10 @@ const backend = defineBackend({
   myApiFunction,
 });
 
-// Crear un nuevo stack para la API
+// create a new API stack
 const apiStack = backend.createStack("api-stack");
 
-// Crear una nueva API REST
+// create a new REST API
 const myRestApi = new RestApi(apiStack, "RestApi", {
   restApiName: "myRestApi",
   deploy: true,
@@ -28,34 +29,48 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
     stageName: "dev",
   },
   defaultCorsPreflightOptions: {
-    allowOrigins: Cors.ALL_ORIGINS, // Restringir esto a los dominios de confianza
-    allowMethods: Cors.ALL_METHODS, // Especificar solo los métodos necesarios
-    allowHeaders: Cors.DEFAULT_HEADERS, // Especificar solo los encabezados necesarios
+    allowOrigins: Cors.ALL_ORIGINS, // Restrict this to domains you trust
+    allowMethods: Cors.ALL_METHODS, // Specify only the methods you need to allow
+    allowHeaders: Cors.DEFAULT_HEADERS, // Specify only the headers you need to allow
   },
 });
 
-// Crear una integración Lambda
+// create a new Lambda integration
 const lambdaIntegration = new LambdaIntegration(
   backend.myApiFunction.resources.lambda
 );
 
-// Crear el recurso /session
-const sessionPath = myRestApi.root.addResource("session");
-
-// Agregar métodos a /session
-sessionPath.addMethod("POST", lambdaIntegration, {
-  authorizationType: AuthorizationType.IAM,
+// create a new resource path with IAM authorization
+const sessionPath = myRestApi.root.addResource("session", {
+  defaultMethodOptions: {
+    authorizationType: AuthorizationType.IAM,
+  },
 });
 
-// Crear el recurso /session/{sessionId}
-const sessionIdResource = sessionPath.addResource("{sessionId}");
-
-// Agregar métodos a /session/{sessionId}
-sessionIdResource.addMethod("GET", lambdaIntegration, {
-  authorizationType: AuthorizationType.IAM,
+// add a resource path that accepts a parameter
+const sessionIdResource = sessionPath.addResource("{sessionId}", {
+  defaultMethodOptions: {
+    authorizationType: AuthorizationType.IAM,
+  },
 });
 
-// Crear una nueva política IAM para permitir invocar la API
+// add methods you would like to create to the resource path
+sessionIdResource.addMethod("GET", lambdaIntegration);
+sessionPath.addMethod("POST", lambdaIntegration);
+
+// create a new Cognito User Pools authorizer
+const cognitoAuth = new CognitoUserPoolsAuthorizer(apiStack, "CognitoAuth", {
+  cognitoUserPools: [backend.auth.resources.userPool],
+});
+
+// create a new resource path with Cognito authorization
+const booksPath = myRestApi.root.addResource("cognito-auth-path");
+booksPath.addMethod("GET", lambdaIntegration, {
+  authorizationType: AuthorizationType.COGNITO,
+  authorizer: cognitoAuth,
+});
+
+// create a new IAM policy to allow Invoke access to the API
 const apiRestPolicy = new Policy(apiStack, "RestApiPolicy", {
   statements: [
     new PolicyStatement({
@@ -63,16 +78,22 @@ const apiRestPolicy = new Policy(apiStack, "RestApiPolicy", {
       resources: [
         `${myRestApi.arnForExecuteApi("*", "/session", "dev")}`,
         `${myRestApi.arnForExecuteApi("*", "/session/*", "dev")}`,
+        `${myRestApi.arnForExecuteApi("*", "/session/{sessionId}", "dev")}`,
+        `${myRestApi.arnForExecuteApi("*", "/cognito-auth-path", "dev")}`,
       ],
     })
   ],
 });
 
-// Adjuntar la política a los roles IAM autenticados y no autenticados
-backend.auth.resources.authenticatedUserIamRole.attachInlinePolicy(apiRestPolicy);
-backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(apiRestPolicy);
+// attach the policy to the authenticated and unauthenticated IAM roles
+backend.auth.resources.authenticatedUserIamRole.attachInlinePolicy(
+  apiRestPolicy
+);
+backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(
+  apiRestPolicy
+);
 
-// Crear una nueva política para Rekognition y S3
+// create a new policy for Rekognition and S3 access
 const rekognitionAndS3Policy = new Policy(apiStack, "RekognitionAndS3Policy", {
   statements: [
     new PolicyStatement({
@@ -94,11 +115,11 @@ const rekognitionAndS3Policy = new Policy(apiStack, "RekognitionAndS3Policy", {
   ],
 });
 
-// Adjuntar la política al rol de ejecución de Lambda
+// attach the policy to the Lambda execution role
 const lambdaRole = backend.myApiFunction.resources.lambda.role as Role;
 lambdaRole.attachInlinePolicy(rekognitionAndS3Policy);
 
-// Agregar salidas al archivo de configuración
+// add outputs to the configuration file
 backend.addOutput({
   custom: {
     API: {
@@ -121,6 +142,5 @@ const livenessPolicy = new Policy(livenessStack, "LivenessPolicy", {
     }),
   ],
 });
-
-backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(livenessPolicy);
+backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(livenessPolicy); // allows guest user access
 backend.auth.resources.authenticatedUserIamRole.attachInlinePolicy(livenessPolicy);
