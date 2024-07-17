@@ -5,8 +5,6 @@ const rekognition = new AWS.Rekognition();
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
     const httpMethod = event.httpMethod;
-    console.log("------HTTP Method:", httpMethod);
-    console.log("------event", event);
 
     let response: APIGatewayProxyResult;
 
@@ -28,14 +26,11 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayEvent): P
 // Función para manejar solicitudes GET
 
 const getFaceLivenessSession = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
-    console.log('-------getFaceLivenessSession event: ', event);
+    console.log('-------getFaceLivenessSession event: ');
 
-    // Verificar si pathParameters está presente y tiene sessionId
-    console.log('-----------el path: ', event.path);
     const path = event.path;
     const parts = path.split('/'); // Divide el path en partes separadas por '/'
     const sessionId = parts[2];
-    console.log('-------......el sessionId: ', sessionId)
 
     if (!sessionId) {
         return {
@@ -53,7 +48,6 @@ const getFaceLivenessSession = async (event: APIGatewayEvent): Promise<APIGatewa
             SessionId: sessionId
         };
         const session = await rekognition.getFaceLivenessSessionResults(params).promise();
-        console.log('----->>>>getFaceLivenessSessionResults: ', session);
         return {
             statusCode: 200,
             headers: {
@@ -92,7 +86,6 @@ const createSessionLiveness = async (event: APIGatewayEvent): Promise<APIGateway
 
         const params = {
             ClientRequestToken: clientRequestToken, // Opcional pero recomendado para idempotencia
-            //KmsKeyId: 'tu-kms-key-id', // Opcional, para encriptar las imágenes almacenadas
             Settings: { // Opcional, para configurar el almacenamiento de imágenes y el límite de imágenes de auditoría
                 AuditImagesLimit: 2, // Puedes especificar de 0 a 4
                 OutputConfig: {
@@ -103,7 +96,6 @@ const createSessionLiveness = async (event: APIGatewayEvent): Promise<APIGateway
         };
 
         const session = await rekognition.createFaceLivenessSession(params).promise();
-        console.log('--------------->......la session creada en backend: ', session);
 
         return {
             statusCode: 200,
@@ -114,8 +106,7 @@ const createSessionLiveness = async (event: APIGatewayEvent): Promise<APIGateway
             body: JSON.stringify(session)
         };
     } catch (error: unknown) {
-        console.log('Entra en el catch....');
-        console.error('----->>>>>>Error creating liveness session:', error);
+        console.error('Error creating liveness session:', error);
 
         let errorMessage = 'Unknown error';
         if (error instanceof Error) {
