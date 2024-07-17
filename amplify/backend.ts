@@ -2,10 +2,9 @@ import { defineBackend } from "@aws-amplify/backend";
 import { Stack } from "aws-cdk-lib";
 import {
   AuthorizationType,
-  CognitoUserPoolsAuthorizer,
-  Cors,
   LambdaIntegration,
   RestApi,
+  Cors,
 } from "aws-cdk-lib/aws-apigateway";
 import { Policy, PolicyStatement, Role } from "aws-cdk-lib/aws-iam";
 import { myApiFunction } from "./functions/api-function/resource";
@@ -40,35 +39,25 @@ const lambdaIntegration = new LambdaIntegration(
   backend.myApiFunction.resources.lambda
 );
 
-// create a new resource path with IAM authorization
+// create a new resource path with IAM authorization for /session
 const sessionPath = myRestApi.root.addResource("session", {
   defaultMethodOptions: {
     authorizationType: AuthorizationType.IAM,
   },
 });
 
-// add a resource path that accepts a parameter
+// add POST method to /session
+sessionPath.addMethod("POST", lambdaIntegration);
+
+// create a new resource path with IAM authorization for /session/{sessionId}
 const sessionIdResource = sessionPath.addResource("{sessionId}", {
   defaultMethodOptions: {
     authorizationType: AuthorizationType.IAM,
   },
 });
 
-// add methods you would like to create to the resource path
+// add GET method to /session/{sessionId}
 sessionIdResource.addMethod("GET", lambdaIntegration);
-sessionPath.addMethod("POST", lambdaIntegration);
-
-// create a new Cognito User Pools authorizer
-const cognitoAuth = new CognitoUserPoolsAuthorizer(apiStack, "CognitoAuth", {
-  cognitoUserPools: [backend.auth.resources.userPool],
-});
-
-// create a new resource path with Cognito authorization
-const booksPath = myRestApi.root.addResource("cognito-auth-path");
-booksPath.addMethod("GET", lambdaIntegration, {
-  authorizationType: AuthorizationType.COGNITO,
-  authorizer: cognitoAuth,
-});
 
 // create a new IAM policy to allow Invoke access to the API
 const apiRestPolicy = new Policy(apiStack, "RestApiPolicy", {
@@ -78,8 +67,6 @@ const apiRestPolicy = new Policy(apiStack, "RestApiPolicy", {
       resources: [
         `${myRestApi.arnForExecuteApi("*", "/session", "dev")}`,
         `${myRestApi.arnForExecuteApi("*", "/session/*", "dev")}`,
-        `${myRestApi.arnForExecuteApi("*", "/session/{proxy+}", "dev")}`,
-        `${myRestApi.arnForExecuteApi("*", "/cognito-auth-path", "dev")}`,
       ],
     })
   ],
