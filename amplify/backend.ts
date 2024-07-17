@@ -17,10 +17,10 @@ const backend = defineBackend({
   myApiFunction,
 });
 
-// create a new API stack
+// Crear un nuevo stack para la API
 const apiStack = backend.createStack("api-stack");
 
-// create a new REST API
+// Crear una nueva API REST
 const myRestApi = new RestApi(apiStack, "RestApi", {
   restApiName: "myRestApi",
   deploy: true,
@@ -28,38 +28,34 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
     stageName: "dev",
   },
   defaultCorsPreflightOptions: {
-    allowOrigins: Cors.ALL_ORIGINS, // Restrict this to domains you trust
-    allowMethods: Cors.ALL_METHODS, // Specify only the methods you need to allow
-    allowHeaders: Cors.DEFAULT_HEADERS, // Specify only the headers you need to allow
+    allowOrigins: Cors.ALL_ORIGINS, // Restringir esto a los dominios de confianza
+    allowMethods: Cors.ALL_METHODS, // Especificar solo los métodos necesarios
+    allowHeaders: Cors.DEFAULT_HEADERS, // Especificar solo los encabezados necesarios
   },
 });
 
-// create a new Lambda integration
+// Crear una integración Lambda
 const lambdaIntegration = new LambdaIntegration(
   backend.myApiFunction.resources.lambda
 );
 
-// create a new resource path with IAM authorization for /session
-const sessionPath = myRestApi.root.addResource("session", {
-  defaultMethodOptions: {
-    authorizationType: AuthorizationType.IAM,
-  },
+// Crear el recurso /session
+const sessionPath = myRestApi.root.addResource("session");
+
+// Agregar métodos a /session
+sessionPath.addMethod("POST", lambdaIntegration, {
+  authorizationType: AuthorizationType.IAM,
 });
 
-// add POST method to /session
-sessionPath.addMethod("POST", lambdaIntegration);
+// Crear el recurso /session/{sessionId}
+const sessionIdResource = sessionPath.addResource("{sessionId}");
 
-// create a new resource path with IAM authorization for /session/{sessionId}
-const sessionIdResource = sessionPath.addResource("{sessionId}", {
-  defaultMethodOptions: {
-    authorizationType: AuthorizationType.IAM,
-  },
+// Agregar métodos a /session/{sessionId}
+sessionIdResource.addMethod("GET", lambdaIntegration, {
+  authorizationType: AuthorizationType.IAM,
 });
 
-// add GET method to /session/{sessionId}
-sessionIdResource.addMethod("GET", lambdaIntegration);
-
-// create a new IAM policy to allow Invoke access to the API
+// Crear una nueva política IAM para permitir invocar la API
 const apiRestPolicy = new Policy(apiStack, "RestApiPolicy", {
   statements: [
     new PolicyStatement({
@@ -72,15 +68,11 @@ const apiRestPolicy = new Policy(apiStack, "RestApiPolicy", {
   ],
 });
 
-// attach the policy to the authenticated and unauthenticated IAM roles
-backend.auth.resources.authenticatedUserIamRole.attachInlinePolicy(
-  apiRestPolicy
-);
-backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(
-  apiRestPolicy
-);
+// Adjuntar la política a los roles IAM autenticados y no autenticados
+backend.auth.resources.authenticatedUserIamRole.attachInlinePolicy(apiRestPolicy);
+backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(apiRestPolicy);
 
-// create a new policy for Rekognition and S3 access
+// Crear una nueva política para Rekognition y S3
 const rekognitionAndS3Policy = new Policy(apiStack, "RekognitionAndS3Policy", {
   statements: [
     new PolicyStatement({
@@ -102,11 +94,11 @@ const rekognitionAndS3Policy = new Policy(apiStack, "RekognitionAndS3Policy", {
   ],
 });
 
-// attach the policy to the Lambda execution role
+// Adjuntar la política al rol de ejecución de Lambda
 const lambdaRole = backend.myApiFunction.resources.lambda.role as Role;
 lambdaRole.attachInlinePolicy(rekognitionAndS3Policy);
 
-// add outputs to the configuration file
+// Agregar salidas al archivo de configuración
 backend.addOutput({
   custom: {
     API: {
@@ -129,5 +121,5 @@ const livenessPolicy = new Policy(livenessStack, "LivenessPolicy", {
     }),
   ],
 });
-backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(livenessPolicy); // allows guest user access
+backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(livenessPolicy);
 backend.auth.resources.authenticatedUserIamRole.attachInlinePolicy(livenessPolicy);
