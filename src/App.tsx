@@ -61,10 +61,11 @@ function App() {
 
   const handleAnalysisComplete = async () => {
     if (createLivenessApiData) {
+      console.log('----createLivenessApiData.sessionId:', createLivenessApiData.sessionId);
       try {
         const restOperation = get({
           apiName: 'myRestApi',
-          path: `session?sessionId=${createLivenessApiData.sessionId}`
+          path: `session/${createLivenessApiData.sessionId}`
         });
         const response = await restOperation.response as unknown as Response;
 
