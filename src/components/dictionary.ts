@@ -10,6 +10,7 @@ export const dictionary = {
       hintCenterFaceText: 'Centra tu cara',
       startScreenBeginCheckText: 'Comenzar a verificar',
       hintHoldFaceForFreshnessText: 'Quédate quieto',
+      hintTooCloseText: 'Muévete hacia atrás',
       hintConnectingText: 'Conectando...',
       hintVerifyingText: 'Verificando...',
       hintTooFarText: 'Acércate más',
