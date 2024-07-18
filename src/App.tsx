@@ -9,7 +9,7 @@ import { ErrorContent } from './components/ErrorContent';
 
 
 function App() {
-  const [nombre] = React.useState<string>('Lorenas'); // Cambia este valor para probar diferentes escenarios
+  const [nombre] = React.useState<string>('Lorena'); // Cambia este valor para probar diferentes escenarios
   const [loading, setLoading] = React.useState<boolean>(true);
   const [createLivenessApiData, setCreateLivenessApiData] = React.useState<{ sessionId: string } | null>(null);
   const [screen, setScreen] = React.useState<'loading' | 'detector' | 'success' | 'error' | 'notLive' | 'nameError' | 'cancelled'>('loading');
