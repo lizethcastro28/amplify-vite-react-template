@@ -41,3 +41,26 @@
   color: #888;
 }
 
+.amplify-button.amplify-button--primary {
+  background-color: #EC7445;
+  border-color: #EC7445;
+  color: white;
+  margin-bottom: 20px; /* Adjust the value to control the space below the button */
+}
+
+.amplify-field-group__control .amplify-button--primary {
+  background-color: #EC7445;
+  border-color: #EC7445;
+  color: white;
+  margin-bottom: 20px; /* Adjust the value to control the space below the button */
+}
+
+.amplify-button.amplify-button--primary:hover {
+  background-color: #D6663E;
+  border-color: #D6663E;
+}
+
+.amplify-button.amplify-button--primary:active {
+  background-color: #C15A37;
+  border-color: #C15A37;
+}
