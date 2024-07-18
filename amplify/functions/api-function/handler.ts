@@ -87,7 +87,7 @@ const createSessionLiveness = async (event: APIGatewayEvent): Promise<APIGateway
         const params = {
             ClientRequestToken: clientRequestToken, // Opcional pero recomendado para idempotencia
             Settings: { // Opcional, para configurar el almacenamiento de imágenes y el límite de imágenes de auditoría
-                AuditImagesLimit: 2, // Puedes especificar de 0 a 4
+                AuditImagesLimit: 4, // Puedes especificar de 0 a 4
                 OutputConfig: {
                     S3Bucket: 'video-signature3-images',
                     S3KeyPrefix: 'liveness-sessions/'
