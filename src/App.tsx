@@ -4,9 +4,12 @@ import { Loader, ThemeProvider } from '@aws-amplify/ui-react';
 import { get, post } from 'aws-amplify/data';
 import '@aws-amplify/ui-react/styles.css';
 import './App.css';
+import { dictionary } from './components/dictionary';
+import { ErrorContent } from './components/ErrorContent';
+
 
 function App() {
-  const [nombre] = React.useState<string>('Lorena'); // Cambia este valor para probar diferentes escenarios
+  const [nombre] = React.useState<string>('Lorenas'); // Cambia este valor para probar diferentes escenarios
   const [loading, setLoading] = React.useState<boolean>(true);
   const [createLivenessApiData, setCreateLivenessApiData] = React.useState<{ sessionId: string } | null>(null);
   const [screen, setScreen] = React.useState<'loading' | 'detector' | 'success' | 'error' | 'notLive' | 'nameError' | 'cancelled'>('loading');
@@ -109,26 +112,6 @@ function App() {
     setScreen('cancelled');
   }
 
-  const dictionary = {
-    // use default strings for english
-    en: null,
-    es: {
-      photosensitivyWarningHeadingText: 'Advertencia de fotosensibilidad',
-      photosensitivyWarningBodyText:
-        'Esta verificación muestra luces de colores. Tenga cuidado si es fotosensible.',
-      photosensitivyWarningInfoText: 
-      'Algunas personas pueden experimentar convulsiones epilépticas al estar expuestas a luces de colores. Use precaución si usted o alguien en su familia tiene una condición epiléptica.',
-      goodFitCaptionText: 'Buen ajuste',
-      tooFarCaptionText: 'Demasiado lejos',
-      hintCenterFaceText: 'Centra tu cara',
-      startScreenBeginCheckText: 'Comenzar a verificar',
-      hintHoldFaceForFreshnessText: 'Quédate quieto',
-      hintConnectingText: 'Connectando...',
-      hintVerifyingText: 'Verificando...',
-      hintTooFarText: 'Acércate más',
-    },
-  };
-
   return (
     <ThemeProvider>
       {loading ? (
@@ -158,7 +141,7 @@ function App() {
         </div>
       ) : screen === 'nameError' ? (
         <div>
-          <h1>Error: Token expiró, danaParam nulo, vftk nulo</h1>
+          <ErrorContent />
         </div>
       ) : screen === 'cancelled' ? (
         <div>
@@ -167,6 +150,7 @@ function App() {
       ) : (
         <div>
           <h1>Error inesperado. Intenta de nuevo.</h1>
+          <ErrorContent />
         </div>
       )}
     </ThemeProvider>
