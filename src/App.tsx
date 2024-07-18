@@ -9,7 +9,7 @@ function App() {
   const [nombre] = React.useState<string>('Lorena'); // Cambia este valor para probar diferentes escenarios
   const [loading, setLoading] = React.useState<boolean>(true);
   const [createLivenessApiData, setCreateLivenessApiData] = React.useState<{ sessionId: string } | null>(null);
-  const [screen, setScreen] = React.useState<'detector' | 'success' | 'error' | 'notLive' | 'nameError' | 'cancelled'>('loading');
+  const [screen, setScreen] = React.useState<'loading' | 'detector' | 'success' | 'error' | 'notLive' | 'nameError' | 'cancelled'>('loading');
 
   React.useEffect(() => {
     if (nombre === 'Lorena') {
@@ -24,18 +24,16 @@ function App() {
           if (response.body) {
             const responseBody = await readStream(response.body);
             const sessionData = JSON.parse(responseBody);
-            console.log('Response Body:', sessionData); // Log para verificar los datos
 
             if (sessionData && sessionData.SessionId) {
               setCreateLivenessApiData({ sessionId: sessionData.SessionId });
-              console.log('Session ID set:', sessionData.SessionId);
+              //console.log('Session ID set:', sessionData.SessionId);
               setScreen('detector');
             } else {
               console.error('Invalid session data received:', sessionData);
               setScreen('error');
             }
             setLoading(false);
-            console.log('POST call succeeded: ', sessionData);
           } else {
             console.log('POST call succeeded but response body is empty');
             setScreen('error');
@@ -70,7 +68,6 @@ function App() {
 
   const handleAnalysisComplete = async () => {
     if (createLivenessApiData) {
-      console.log('----createLivenessApiData.sessionId:', createLivenessApiData.sessionId);
       try {
         const restOperation = get({
           apiName: 'myRestApi',
@@ -81,7 +78,6 @@ function App() {
         if (response.body) {
           const responseBody = await readStream(response.body);
           const data = JSON.parse(responseBody); // Parse JSON string to object
-          console.log('-------Response Body:', data); // Log para verificar los datos
           if (data.Status === 'SUCCEEDED') {
             if (data.Confidence > 95) {
               console.log('-----is live');
@@ -132,7 +128,6 @@ function App() {
       hintTooFarText: 'Acércate más',
     },
   };
-  
 
   return (
     <ThemeProvider>
