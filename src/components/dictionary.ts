@@ -4,7 +4,7 @@ export const dictionary = {
     es: {
       photosensitivyWarningHeadingText: 'Advertencia de fotosensibilidad',
       photosensitivyWarningBodyText: 'Esta verificación muestra luces de colores. Tenga cuidado si es fotosensible.',
-      photosensitivyWarningInfoText: 'Algunas personas pueden experimentar convulsiones epilépticas al estar expuestas a luces de colores. Use precaución si usted o alguien en su familia tiene una condición epiléptica.',
+      photosensitivyWarningInfoText: 'Algunas personas pueden experimentar convulsiones epilépticas al estar expuestas a luces de colores. Tenga precaución si usted o alguien en su familia tiene una condición epiléptica.',
       goodFitCaptionText: 'Buen ajuste',
       tooFarCaptionText: 'Demasiado lejos',
       hintCenterFaceText: 'Centra tu cara',

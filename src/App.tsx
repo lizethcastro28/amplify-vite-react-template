@@ -1,12 +1,11 @@
 import React from 'react';
 import { FaceLivenessDetector } from '@aws-amplify/ui-react-liveness';
-import { Loader, ThemeProvider } from '@aws-amplify/ui-react';
+import { Loader, ThemeProvider, Button } from '@aws-amplify/ui-react';
 import { get, post } from 'aws-amplify/data';
 import '@aws-amplify/ui-react/styles.css';
 import './App.css';
 import { dictionary } from './components/dictionary';
 import { ErrorContent } from './components/ErrorContent';
-
 
 function App() {
   const [nombre] = React.useState<string>('Lorena'); // Cambia este valor para probar diferentes escenarios
@@ -82,11 +81,11 @@ function App() {
           const responseBody = await readStream(response.body);
           const data = JSON.parse(responseBody); // Parse JSON string to object
           if (data.Status === 'SUCCEEDED') {
-            if (data.Confidence > 95) {
-              console.log('-----is live');
+            if (data.Confidence > 90) {
+              console.log('-----is live: ', data.Confidence);
               setScreen('success');
             } else {
-              console.log('---is not live');
+              console.log('---is not live: ', data.Confidence);
               setScreen('notLive');
             }
           } else {
@@ -137,20 +136,49 @@ function App() {
         </div>
       ) : screen === 'notLive' ? (
         <div>
-          <h1>No es una persona</h1>
+          <ErrorContent
+            titulo="No es una persona"
+            descripcion="La cámara no reconoce una persona."
+            razones={[
+              "Es posible que no hayas seguidos las instrucciones."
+            ]}
+            instrucciones="Por favor, regresa, ponte de frente a la cámara y sigue las instrucciones."
+            visible={true}
+            setScreen={setScreen}
+          />
         </div>
       ) : screen === 'nameError' ? (
         <div>
-          <ErrorContent />
+          <ErrorContent
+            titulo="Nombre no reconocido"
+            descripcion="El nombre ingresado no es válido para esta operación."
+            razones={[]}
+            instrucciones="Por favor, verifique el nombre ingresado y vuelva a intentarlo."
+            visible={false}
+            setScreen={setScreen}
+          />
         </div>
       ) : screen === 'cancelled' ? (
         <div>
-          <h1>Acción cancelada por el usuario.</h1>
+          <ErrorContent
+            titulo="Acción cancelada por el Usuario"
+            descripcion="Puedes volver a intentarlo."
+            razones={[]}
+            instrucciones=""
+            visible={false}
+            setScreen={setScreen}
+          />
         </div>
       ) : (
         <div>
-          <h1>Error inesperado. Intenta de nuevo.</h1>
-          <ErrorContent />
+          <ErrorContent
+            titulo="Error inesperado"
+            descripcion="Intenta de nuevo."
+            razones={[]}
+            instrucciones="Refresca la página o contacta con soporte técnico."
+            visible={false}
+            setScreen={setScreen}
+          />
         </div>
       )}
     </ThemeProvider>

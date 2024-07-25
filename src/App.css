@@ -64,3 +64,20 @@
   background-color: #C15A37;
   border-color: #C15A37;
 }
+/* Custom class for the button */
+.custom-button {
+  background-color: #EC7445;
+  border-color: #EC7445;
+  color: white;
+  margin-top: 20px; /* Add top margin to create space above the button */
+}
+
+.custom-button:hover {
+  background-color: #D6663E;
+  border-color: #D6663E;
+}
+
+.custom-button:active {
+  background-color: #C15A37;
+  border-color: #C15A37;
+}
