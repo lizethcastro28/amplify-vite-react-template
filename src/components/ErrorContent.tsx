@@ -10,7 +10,7 @@ interface ErrorContentProps {
   setScreen?: React.Dispatch<React.SetStateAction<'loading' | 'detector' | 'success' | 'error' | 'notLive' | 'dataError' | 'cancelled'>>;
 }
 
-export const ErrorContent: React.FC<ErrorContentProps> = ({ titulo, descripcion, razones, instrucciones, visible, setScreen }) => {
+export const ErrorContent: React.FC<ErrorContentProps> = ({ titulo, descripcion, razones, instrucciones, visible }) => {
   return (
     <Flex
       className="amplify-flex amplify-alert amplify-liveness-start-screen-warning"
