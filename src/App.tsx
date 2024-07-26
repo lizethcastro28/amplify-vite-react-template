@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaceLivenessDetector } from '@aws-amplify/ui-react-liveness';
-import { Loader, ThemeProvider, Button } from '@aws-amplify/ui-react';
+import { Loader, ThemeProvider } from '@aws-amplify/ui-react';
 import { get, post } from 'aws-amplify/data';
 import '@aws-amplify/ui-react/styles.css';
 import './App.css';
@@ -11,44 +11,64 @@ function App() {
   const [nombre] = React.useState<string>('Lorena'); // Cambia este valor para probar diferentes escenarios
   const [loading, setLoading] = React.useState<boolean>(true);
   const [createLivenessApiData, setCreateLivenessApiData] = React.useState<{ sessionId: string } | null>(null);
-  const [screen, setScreen] = React.useState<'loading' | 'detector' | 'success' | 'error' | 'notLive' | 'nameError' | 'cancelled'>('loading');
+  const [screen, setScreen] = React.useState<'loading' | 'detector' | 'success' | 'error' | 'notLive' | 'dataError' | 'cancelled'>('loading');
 
   React.useEffect(() => {
-    if (nombre === 'Lorena') {
-      const fetchCreateLiveness = async () => {
-        try {
-          const restOperation = post({
-            apiName: 'myRestApi',
-            path: 'session',
-          });
-          const response = (await restOperation.response) as unknown as Response;
+    // Obtener parámetros del URL
+    const params = new URLSearchParams(window.location.search);
+    const vftk = params.get('vftk');
+    const danaParam = params.get('dana');
 
-          if (response.body) {
-            const responseBody = await readStream(response.body);
-            const sessionData = JSON.parse(responseBody);
+    if (vftk && danaParam) {
+      //aqui consultos los datos de la persona en DanaConnect
+      const fetchDataDana = async () => {
+        const restOperation = get({
+          apiName: 'myRestApi',
+          path: 'fetch-data-dana',
+        });
+        const data = (await restOperation.response) as unknown as Response;
+        console.log('la respuesta de dana: ', data);
+      }
 
-            if (sessionData && sessionData.SessionId) {
-              setCreateLivenessApiData({ sessionId: sessionData.SessionId });
-              //console.log('Session ID set:', sessionData.SessionId);
-              setScreen('detector');
+      if (nombre === 'Lorena') {
+        console.log('----hay datos: ');
+        const fetchCreateLiveness = async () => {
+          try {
+            const restOperation = post({
+              apiName: 'myRestApi',
+              path: 'session',
+            });
+            const response = (await restOperation.response) as unknown as Response;
+
+            if (response.body) {
+              const responseBody = await readStream(response.body);
+              const sessionData = JSON.parse(responseBody);
+
+              if (sessionData && sessionData.SessionId) {
+                setCreateLivenessApiData({ sessionId: sessionData.SessionId });
+                setScreen('detector');
+              } else {
+                console.error('Invalid session data received:', sessionData);
+                setScreen('error');
+              }
+              setLoading(false);
             } else {
-              console.error('Invalid session data received:', sessionData);
+              console.log('POST call succeeded but response body is empty');
               setScreen('error');
             }
-            setLoading(false);
-          } else {
-            console.log('POST call succeeded but response body is empty');
+          } catch (error) {
+            console.log('------POST call failed: ', error);
             setScreen('error');
           }
-        } catch (error) {
-          console.log('------POST call failed: ', error);
-          setScreen('error');
-        }
-      };
+        };
 
-      fetchCreateLiveness();
+        fetchCreateLiveness();
+      } else {
+        setScreen('dataError');
+        setLoading(false);
+      }
     } else {
-      setScreen('nameError');
+      setScreen('error');
       setLoading(false);
     }
   }, [nombre]);
@@ -147,7 +167,7 @@ function App() {
             setScreen={setScreen}
           />
         </div>
-      ) : screen === 'nameError' ? (
+      ) : screen === 'dataError' ? (
         <div>
           <ErrorContent
             titulo="Nombre no reconocido"

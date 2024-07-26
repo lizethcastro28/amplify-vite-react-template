@@ -8,6 +8,7 @@ import {
   RestApi,
 } from "aws-cdk-lib/aws-apigateway";
 import { Policy, PolicyStatement, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
+import { Function, Runtime, Code } from "aws-cdk-lib/aws-lambda";
 import { myApiFunction } from "./functions/api-function/resource";
 import { auth } from "./auth/resource";
 import { data } from "./data/resource";
@@ -35,10 +36,23 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
   },
 });
 
+// create fetchDataDanaFunction
+const fetchDataDanaFunction = new Function(apiStack, "fetchDataDanaFunction", {
+  runtime: Runtime.NODEJS_18_X,
+  handler: "fetch-data-dana-function.handler",
+  code: Code.fromAsset("functions"), // path to the functions directory
+  environment: {
+    // Add any environment variables if needed
+  },
+});
+
 // create a new Lambda integration
 const lambdaIntegration = new LambdaIntegration(
   backend.myApiFunction.resources.lambda
 );
+
+// add fetchDataDanaFunction integration
+const fetchDataDanaIntegration = new LambdaIntegration(fetchDataDanaFunction);
 
 // create a new resource path with IAM authorization
 const sessionPath = myRestApi.root.addResource("session", {
@@ -50,6 +64,12 @@ const sessionPath = myRestApi.root.addResource("session", {
 // add methods you would like to create to the resource path
 sessionPath.addMethod("GET", lambdaIntegration);
 sessionPath.addMethod("POST", lambdaIntegration);
+
+// create a new resource path for fetchDataDanaFunction
+const fetchDataDanaPath = myRestApi.root.addResource("fetch-data-dana");
+fetchDataDanaPath.addMethod("GET", fetchDataDanaIntegration, {
+  authorizationType: AuthorizationType.NONE,
+});
 
 // add a proxy resource path to the API
 sessionPath.addProxy({
@@ -78,6 +98,7 @@ const apiRestPolicy = new Policy(apiStack, "RestApiPolicy", {
         `${myRestApi.arnForExecuteApi("*", "/session", "dev")}`,
         `${myRestApi.arnForExecuteApi("*", "/session/*", "dev")}`,
         `${myRestApi.arnForExecuteApi("*", "/cognito-auth-path", "dev")}`,
+        `${myRestApi.arnForExecuteApi("*", "/fetch-data-dana", "dev")}`,
       ],
     })
   ],
