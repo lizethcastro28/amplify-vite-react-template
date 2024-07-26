@@ -21,15 +21,8 @@ function App() {
 
     if (vftk && danaParam) {
       //aqui consultos los datos de la persona en DanaConnect
-      const fetchDataDana = async () => {
-        const restOperation = get({
-          apiName: 'myRestApi',
-          path: 'fetch-data-dana',
-        });
-        const data = (await restOperation.response) as unknown as Response;
-        console.log('la respuesta de dana: ', data);
-      }
-
+      const data = fetchDataDana();
+      console.log('la respuesta de dana: ', data);
       if (nombre === 'Lorena') {
         console.log('----hay datos: ');
         const fetchCreateLiveness = async () => {
@@ -73,6 +66,14 @@ function App() {
     }
   }, [nombre]);
 
+  const fetchDataDana = async () => {
+    const restOperation = get({
+      apiName: 'myRestApi',
+      path: 'fetch-data-dana',
+    });
+    const data = (await restOperation.response) as unknown as Response;
+    return data;
+  }
   async function readStream(stream: ReadableStream<Uint8Array>): Promise<string> {
     const reader = stream.getReader();
     const decoder = new TextDecoder();
