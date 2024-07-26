@@ -40,7 +40,7 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
 const fetchDataDanaFunction = new Function(apiStack, "fetchDataDanaFunction", {
   runtime: Runtime.NODEJS_18_X,
   handler: "fetchDataDanaFunction.handler", 
-  code: Code.fromAsset("amplify/backend/functions/api-function"), 
+  code: Code.fromAsset("amplify/functions/api-function"), 
 });
 
 // Create a new Lambda integration
