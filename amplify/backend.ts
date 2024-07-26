@@ -7,7 +7,7 @@ import {
   LambdaIntegration,
   RestApi,
 } from "aws-cdk-lib/aws-apigateway";
-import { Policy, PolicyStatement, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
+import { Policy, PolicyStatement, Role } from "aws-cdk-lib/aws-iam";
 import { Function, Runtime, Code } from "aws-cdk-lib/aws-lambda";
 import { myApiFunction } from "./functions/api-function/resource";
 import { auth } from "./auth/resource";
@@ -39,11 +39,8 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
 // Create fetchDataDanaFunction
 const fetchDataDanaFunction = new Function(apiStack, "fetchDataDanaFunction", {
   runtime: Runtime.NODEJS_18_X,
-  handler: "fetchDataDanaFunction.handler",
-  code: Code.fromAsset("functions/api-function"), 
-  environment: {
-    // Agrega las variables de entorno si es necesario
-  },
+  handler: "fetchDataDanaFunction.handler", 
+  code: Code.fromAsset("amplify/backend/functions/api-function"), 
 });
 
 // Create a new Lambda integration
