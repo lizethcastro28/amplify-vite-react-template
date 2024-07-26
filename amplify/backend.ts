@@ -40,9 +40,9 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
 const fetchDataDanaFunction = new Function(apiStack, "fetchDataDanaFunction", {
   runtime: Runtime.NODEJS_18_X,
   handler: "fetch-data-dana-function.handler",
-  code: Code.fromAsset("functions"), // path to the functions directory
+  code: Code.fromAsset("functions/api-function"), 
   environment: {
-    // Add any environment variables if needed
+    // Agrega las variables de entorno si es necesario
   },
 });
 
