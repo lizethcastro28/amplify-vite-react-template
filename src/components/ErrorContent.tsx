@@ -17,6 +17,7 @@ export const ErrorContent: React.FC<ErrorContentProps> = ({ titulo, descripcion,
       style={{ zIndex: 3, flexDirection: 'column', alignItems: 'center', padding: '12px' }}
     >
       <img src="https://imgcdn.email-platform.com/brand/venturestars/f7b7ef16c6.png" className="mx-auto mt-10 h-32" alt="Logo" />
+     
       <div style={{ flex: '1 1 0%', marginTop: '20px', textAlign: 'center' }}>
         <Alert variation="error" isDismissible={false}>
           <Text fontWeight="bold">{titulo}</Text>
