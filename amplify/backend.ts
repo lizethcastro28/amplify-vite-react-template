@@ -76,8 +76,6 @@ fetchDataDanaPath.addMethod("GET", fetchDataDanaIntegration, {
   ],
 });
 
-
-
 // Add a proxy resource path to the API
 sessionPath.addProxy({
   anyMethod: true,
