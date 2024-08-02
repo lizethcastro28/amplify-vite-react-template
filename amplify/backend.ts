@@ -64,7 +64,20 @@ sessionPath.addMethod("POST", lambdaIntegration);
 const fetchDataDanaPath = myRestApi.root.addResource("fetch-data-dana");
 fetchDataDanaPath.addMethod("GET", fetchDataDanaIntegration, {
   authorizationType: AuthorizationType.NONE,
+  methodResponses: [
+    {
+      statusCode: "200",
+      responseParameters: {
+        "method.response.header.Access-Control-Allow-Origin": true,
+        "method.response.header.Access-Control-Allow-Headers": true,
+        "method.response.header.Access-Control-Allow-Methods": true,
+      },
+    },
+  ],
 });
+
+
+
 
 // Add a proxy resource path to the API
 sessionPath.addProxy({
