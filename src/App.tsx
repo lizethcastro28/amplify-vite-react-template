@@ -66,14 +66,14 @@ function App() {
     }
   }, [nombre]);
 
-  const fetchDataDana = async () => {
+  /*const fetchDataDana = async () => {
     const restOperation = get({
       apiName: 'myRestApi',
       path: 'fetch-data-dana',
     });
     const data = (await restOperation.response) as unknown as Response;
     return data;
-  }
+  }*/
   async function readStream(stream: ReadableStream<Uint8Array>): Promise<string> {
     const reader = stream.getReader();
     const decoder = new TextDecoder();
