@@ -21,8 +21,8 @@ function App() {
 
     if (vftk && danaParam) {
       //aqui consultos los datos de la persona en DanaConnect
-      const data = fetchDataDana();
-      console.log('la respuesta de dana: ', data);
+      //const data = fetchDataDana();
+      //console.log('la respuesta de dana: ', data);
       if (nombre === 'Lorena') {
         console.log('----hay datos: ');
         const fetchCreateLiveness = async () => {
