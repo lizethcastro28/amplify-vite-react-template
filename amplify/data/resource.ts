@@ -14,12 +14,14 @@ const schema = a.schema({
     })
     .authorization((allow) => [allow.publicApiKey()]),
 
-  fetchDataDana: a
+    fetchDataDana: a
     .query()
     .arguments({
       dana: a.string().default(""),
     })
-    .handler(a.handler.function(fetchDataDana)),
+    .authorization((allow) => [allow.publicApiKey()]) // Regla de autorización adecuada
+    .handler(a.handler.function(fetchDataDana)), 
+    
 });
 
 export type Schema = ClientSchema<typeof schema>;
