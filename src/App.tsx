@@ -2,12 +2,10 @@ import React from 'react';
 import { FaceLivenessDetector } from '@aws-amplify/ui-react-liveness';
 import { Loader, ThemeProvider } from '@aws-amplify/ui-react';
 import { get, post } from 'aws-amplify/data';
-import { Schema } from "../amplify/data/resource";
 import '@aws-amplify/ui-react/styles.css';
 import './App.css';
 import { dictionary } from './components/dictionary';
 import { ErrorContent } from './components/ErrorContent';
-import { generateClient } from "aws-amplify/api";
 
 function App() {
   const [nombre] = React.useState<string>('Lorena'); // Cambia este valor para probar diferentes escenarios
