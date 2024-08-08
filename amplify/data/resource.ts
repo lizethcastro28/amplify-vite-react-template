@@ -19,7 +19,6 @@ const schema = a.schema({
     .arguments({
       dana: a.string().default(""),
     })
-    .returns(a.string())
     .handler(a.handler.function(fetchDataDana)),
 });
 
