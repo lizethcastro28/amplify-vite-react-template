@@ -8,10 +8,10 @@ import {
   RestApi,
 } from "aws-cdk-lib/aws-apigateway";
 import { Policy, PolicyStatement, Role } from "aws-cdk-lib/aws-iam";
-import { myApiFunction } from "./functions/api-function/resource";
 import { auth } from "./auth/resource";
 import { data } from "./data/resource";
 import { fetchDataDana } from './functions/fetch-data-dana/resource';
+import { myApiFunction } from "./functions/api-function/resource";
 
 const backend = defineBackend({
   auth,
@@ -20,7 +20,7 @@ const backend = defineBackend({
   fetchDataDana,
 });
 
-// create a new API stack
+//=============create a new API stack==============
 const apiStack = backend.createStack("api-stack");
 
 // create a new REST API
@@ -37,29 +37,42 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
   },
 });
 
+// ==============Create resource session============
 // create a new Lambda integration
 const lambdaIntegration = new LambdaIntegration(
   backend.myApiFunction.resources.lambda
 );
-
 // create a new resource path with IAM authorization
 const sessionPath = myRestApi.root.addResource("session", {
   defaultMethodOptions: {
     authorizationType: AuthorizationType.IAM,
   },
 });
-
 // add methods you would like to create to the resource path
 sessionPath.addMethod("GET", lambdaIntegration);
 sessionPath.addMethod("POST", lambdaIntegration);
-
 // add a proxy resource path to the API
 sessionPath.addProxy({
   anyMethod: true,
   defaultIntegration: lambdaIntegration,
 });
 
-// create a new Cognito User Pools authorizer
+// ==============Create resource data============
+// create a new Lambda integration
+const lambdaIntegrationDana = new LambdaIntegration(
+  backend.fetchDataDana.resources.lambda
+);
+// create a new resource path with IAM authorization
+const dataPath = myRestApi.root.addResource("data", {
+  defaultMethodOptions: {
+    authorizationType: AuthorizationType.IAM,
+  },
+});
+// add methods you would like to create to the resource path
+dataPath.addMethod("GET", lambdaIntegrationDana);
+dataPath.addMethod("POST", lambdaIntegrationDana);
+
+//================create a new Cognito User Pools authorizer
 const cognitoAuth = new CognitoUserPoolsAuthorizer(apiStack, "CognitoAuth", {
   cognitoUserPools: [backend.auth.resources.userPool],
 });
@@ -79,6 +92,8 @@ const apiRestPolicy = new Policy(apiStack, "RestApiPolicy", {
       resources: [
         `${myRestApi.arnForExecuteApi("*", "/session", "dev")}`,
         `${myRestApi.arnForExecuteApi("*", "/session/*", "dev")}`,
+        `${myRestApi.arnForExecuteApi("*", "/data", "dev")}`,
+        `${myRestApi.arnForExecuteApi("*", "/data/*", "dev")}`,
         `${myRestApi.arnForExecuteApi("*", "/cognito-auth-path", "dev")}`,
       ],
     })

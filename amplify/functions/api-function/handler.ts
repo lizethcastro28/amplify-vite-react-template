@@ -1,9 +1,7 @@
 import type { APIGatewayProxyHandler, APIGatewayProxyResult, APIGatewayEvent } from "aws-lambda";
-import * as AWS from 'aws-sdk';
-import { getFaceLivenessSession } from './getFaceLivenessSession'; 
+import { getFaceLivenessSession } from './getFaceLivenessSession';
 import { createSessionLiveness } from './createSessionLiveness';
 
-const rekognition = new AWS.Rekognition();
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
     const httpMethod = event.httpMethod;
