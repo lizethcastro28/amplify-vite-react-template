@@ -2,10 +2,12 @@ import React from 'react';
 import { FaceLivenessDetector } from '@aws-amplify/ui-react-liveness';
 import { Loader, ThemeProvider } from '@aws-amplify/ui-react';
 import { get, post } from 'aws-amplify/data';
+import { Schema } from "../amplify/data/resource";
 import '@aws-amplify/ui-react/styles.css';
 import './App.css';
 import { dictionary } from './components/dictionary';
 import { ErrorContent } from './components/ErrorContent';
+import { generateClient } from "aws-amplify/api";
 
 function App() {
   const [nombre] = React.useState<string>('Lorena'); // Cambia este valor para probar diferentes escenarios
@@ -18,11 +20,15 @@ function App() {
     const params = new URLSearchParams(window.location.search);
     const vftk = params.get('vftk');
     const danaParam = params.get('dana');
+    const client = generateClient<Schema>()
 
     if (vftk && danaParam) {
       //aqui consultos los datos de la persona en DanaConnect
-      //const data = fetchDataDana();
-      //console.log('la respuesta de dana: ', data);
+
+      const data = client.queries.sayHello({
+        name: "Amplify",
+      })
+      console.log('-------la respuesta de dana: ', data);
       if (nombre === 'Lorena') {
         console.log('----hay datos: ');
         const fetchCreateLiveness = async () => {
@@ -66,14 +72,7 @@ function App() {
     }
   }, [nombre]);
 
-  /*const fetchDataDana = async () => {
-    const restOperation = get({
-      apiName: 'myRestApi',
-      path: 'fetch-data-dana',
-    });
-    const data = (await restOperation.response) as unknown as Response;
-    return data;
-  }*/
+
   async function readStream(stream: ReadableStream<Uint8Array>): Promise<string> {
     const reader = stream.getReader();
     const decoder = new TextDecoder();

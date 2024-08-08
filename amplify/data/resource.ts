@@ -1,4 +1,5 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
+import { fetchDataDana } from '../functions/fetch-data-dana/resource';
 
 /*== STEP 1 ===============================================================
 The section below creates a Todo database table with a "content" field. Try
@@ -12,6 +13,14 @@ const schema = a.schema({
       content: a.string(),
     })
     .authorization((allow) => [allow.publicApiKey()]),
+
+  fetchDataDana: a
+    .query()
+    .arguments({
+      dana: a.string().default(""),
+    })
+    .returns(a.string())
+    .handler(a.handler.function(fetchDataDana)),
 });
 
 export type Schema = ClientSchema<typeof schema>;
@@ -32,7 +41,7 @@ Go to your frontend source code. From your client-side code, generate a
 Data client to make CRUDL requests to your table. (THIS SNIPPET WILL ONLY
 WORK IN THE FRONTEND CODE FILE.)
 
-Using JavaScript or Next.js React Server Components, Middleware, Server 
+Using JavaScript or Next.js React Server Components, Middleware, Server
 Actions or Pages Router? Review how to generate Data clients for those use
 cases: https://docs.amplify.aws/gen2/build-a-backend/data/connect-to-API/
 =========================================================================*/
