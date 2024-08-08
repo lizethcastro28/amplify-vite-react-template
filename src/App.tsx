@@ -20,15 +20,10 @@ function App() {
     const params = new URLSearchParams(window.location.search);
     const vftk = params.get('vftk');
     const danaParam = params.get('dana');
-    const client = generateClient<Schema>()
 
     if (vftk && danaParam) {
       //aqui consultos los datos de la persona en DanaConnect
 
-      const data = client.queries.sayHello({
-        name: "Amplify",
-      })
-      console.log('-------la respuesta de dana: ', data);
       if (nombre === 'Lorena') {
         console.log('----hay datos: ');
         const fetchCreateLiveness = async () => {
@@ -71,7 +66,6 @@ function App() {
       setLoading(false);
     }
   }, [nombre]);
-
 
   async function readStream(stream: ReadableStream<Uint8Array>): Promise<string> {
     const reader = stream.getReader();
