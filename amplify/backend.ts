@@ -6,7 +6,6 @@ import {
   Cors,
   LambdaIntegration,
   RestApi,
-  MethodOptions,
 } from "aws-cdk-lib/aws-apigateway";
 import { Policy, PolicyStatement, Role } from "aws-cdk-lib/aws-iam";
 import { auth } from "./auth/resource";
@@ -21,10 +20,10 @@ const backend = defineBackend({
   fetchDataDana,
 });
 
-// Create a new API stack
+//=============create a new API stack==============
 const apiStack = backend.createStack("api-stack");
 
-// Create a new REST API
+// create a new REST API
 const myRestApi = new RestApi(apiStack, "RestApi", {
   restApiName: "myRestApi",
   deploy: true,
@@ -38,67 +37,54 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
   },
 });
 
-// Create a new Lambda integration
-const lambdaIntegration = new LambdaIntegration(backend.myApiFunction.resources.lambda);
-
-// Create a new resource path with IAM authorization
+// ==============Create resource session============
+// create a new Lambda integration
+const lambdaIntegration = new LambdaIntegration(
+  backend.myApiFunction.resources.lambda
+);
+// create a new resource path with IAM authorization
 const sessionPath = myRestApi.root.addResource("session", {
   defaultMethodOptions: {
     authorizationType: AuthorizationType.IAM,
   },
 });
-
-// Add methods to the resource path
+// add methods you would like to create to the resource path
 sessionPath.addMethod("GET", lambdaIntegration);
 sessionPath.addMethod("POST", lambdaIntegration);
+// add a proxy resource path to the API
+sessionPath.addProxy({
+  anyMethod: true,
+  defaultIntegration: lambdaIntegration,
+});
 
-// Create a new Lambda integration for /data
-const lambdaIntegrationDana = new LambdaIntegration(backend.fetchDataDana.resources.lambda);
-
-// Create a new resource path with IAM authorization
+// ==============Create resource data============
+// create a new Lambda integration
+const lambdaIntegrationDana = new LambdaIntegration(
+  backend.fetchDataDana.resources.lambda
+);
+// create a new resource path with IAM authorization
 const dataPath = myRestApi.root.addResource("data", {
   defaultMethodOptions: {
     authorizationType: AuthorizationType.IAM,
   },
 });
+// add methods you would like to create to the resource path
+dataPath.addMethod("GET", lambdaIntegrationDana);
+dataPath.addMethod("POST", lambdaIntegrationDana);
 
-// Add methods to the resource path
-dataPath.addMethod("GET", lambdaIntegrationDana, {
-  // Specific CORS configuration for /data
-  methodResponses: [{
-    statusCode: "200",
-    responseParameters: {
-      "method.response.header.Access-Control-Allow-Origin": true,
-      "method.response.header.Access-Control-Allow-Methods": true,
-      "method.response.header.Access-Control-Allow-Headers": true,
-    },
-  }],
-});
-dataPath.addMethod("POST", lambdaIntegrationDana, {
-  // Specific CORS configuration for /data
-  methodResponses: [{
-    statusCode: "200",
-    responseParameters: {
-      "method.response.header.Access-Control-Allow-Origin": true,
-      "method.response.header.Access-Control-Allow-Methods": true,
-      "method.response.header.Access-Control-Allow-Headers": true,
-    },
-  }],
-});
-
-// Create a new Cognito User Pools authorizer
+//================create a new Cognito User Pools authorizer
 const cognitoAuth = new CognitoUserPoolsAuthorizer(apiStack, "CognitoAuth", {
   cognitoUserPools: [backend.auth.resources.userPool],
 });
 
-// Create a new resource path with Cognito authorization
+// create a new resource path with Cognito authorization
 const booksPath = myRestApi.root.addResource("cognito-auth-path");
 booksPath.addMethod("GET", lambdaIntegration, {
   authorizationType: AuthorizationType.COGNITO,
   authorizer: cognitoAuth,
 });
 
-// Create a new IAM policy to allow Invoke access to the API
+// create a new IAM policy to allow Invoke access to the API
 const apiRestPolicy = new Policy(apiStack, "RestApiPolicy", {
   statements: [
     new PolicyStatement({
@@ -114,11 +100,15 @@ const apiRestPolicy = new Policy(apiStack, "RestApiPolicy", {
   ],
 });
 
-// Attach the policy to the authenticated and unauthenticated IAM roles
-backend.auth.resources.authenticatedUserIamRole.attachInlinePolicy(apiRestPolicy);
-backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(apiRestPolicy);
+// attach the policy to the authenticated and unauthenticated IAM roles
+backend.auth.resources.authenticatedUserIamRole.attachInlinePolicy(
+  apiRestPolicy
+);
+backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(
+  apiRestPolicy
+);
 
-// Create a new policy for Rekognition and S3 access
+// create a new policy for Rekognition and S3 access
 const rekognitionAndS3Policy = new Policy(apiStack, "RekognitionAndS3Policy", {
   statements: [
     new PolicyStatement({
@@ -140,11 +130,11 @@ const rekognitionAndS3Policy = new Policy(apiStack, "RekognitionAndS3Policy", {
   ],
 });
 
-// Attach the policy to the Lambda execution role
+// attach the policy to the Lambda execution role
 const lambdaRole = backend.myApiFunction.resources.lambda.role as Role;
 lambdaRole.attachInlinePolicy(rekognitionAndS3Policy);
 
-// Add outputs to the configuration file
+// add outputs to the configuration file
 backend.addOutput({
   custom: {
     API: {
