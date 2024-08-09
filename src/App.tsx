@@ -22,11 +22,11 @@ function App() {
 
       if (vftk && danaParam) {
         //Consultos los datos de la persona en DanaConnect
-        const fetchData = async (danaParam: string) => {
-          const res = await getDataDana(danaParam); // Esperar a que se resuelva la Promise
+        const fetchData = async (danaParam: string, vftk: string) => {
+          const res = await getDataDana(danaParam, vftk); // Esperar a que se resuelva la Promise
           console.log('-------llamo a dana: ', res);
         }
-        fetchData(danaParam);
+        fetchData(danaParam, vftk);
         if (nombre === 'Lorena') {
           console.log('----hay datos: ');
           fetchCreateLiveness();
@@ -42,10 +42,12 @@ function App() {
     fetchDataAndProcess();
   }, [nombre]);
 
-  const getDataDana = async (danaParam: string) => {
+  const getDataDana = async (danaParam: string, vftkParam: string) => {
+    const path = `data?vftk=${encodeURIComponent(vftkParam)}&dana=${encodeURIComponent(danaParam)}`;
+
     const restOperation = get({
       apiName: 'myRestApi',
-      path: 'data?dana=' + danaParam,
+      path: path,
     });
     const response = (await restOperation.response) as unknown as Response;
     if (response.body) {
