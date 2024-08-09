@@ -69,8 +69,36 @@ const dataPath = myRestApi.root.addResource("data", {
   },
 });
 // add methods you would like to create to the resource path
-dataPath.addMethod("GET", lambdaIntegrationDana);
-dataPath.addMethod("POST", lambdaIntegrationDana);
+dataPath.addMethod("OPTIONS", lambdaIntegrationDana, {
+  methodResponses: [{
+    statusCode: "200",
+    responseParameters: {
+      "method.response.header.Access-Control-Allow-Origin": true,
+      "method.response.header.Access-Control-Allow-Methods": true,
+      "method.response.header.Access-Control-Allow-Headers": true,
+    },
+  }],
+});
+dataPath.addMethod("GET", lambdaIntegrationDana, {
+  methodResponses: [{
+    statusCode: "200",
+    responseParameters: {
+      "method.response.header.Access-Control-Allow-Origin": true,
+      "method.response.header.Access-Control-Allow-Methods": true,
+      "method.response.header.Access-Control-Allow-Headers": true,
+    },
+  }],
+});
+dataPath.addMethod("POST", lambdaIntegrationDana, {
+  methodResponses: [{
+    statusCode: "200",
+    responseParameters: {
+      "method.response.header.Access-Control-Allow-Origin": true,
+      "method.response.header.Access-Control-Allow-Methods": true,
+      "method.response.header.Access-Control-Allow-Headers": true,
+    },
+  }],
+});
 
 //================create a new Cognito User Pools authorizer
 const cognitoAuth = new CognitoUserPoolsAuthorizer(apiStack, "CognitoAuth", {
