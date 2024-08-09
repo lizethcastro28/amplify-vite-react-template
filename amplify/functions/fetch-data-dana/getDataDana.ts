@@ -31,7 +31,7 @@ export const getDataDana = async (event: APIGatewayEvent): Promise<APIGatewayPro
             path: `/api/1.0/rest/conversation/data/${encodeURIComponent(danaParam)}`,
             method: 'GET',
             headers: {
-                'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type',
                 'Content-Type': 'application/json',
                 'Authorization': `Basic ${base64Credentials}`
