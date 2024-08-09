@@ -45,7 +45,7 @@ function App() {
   const getDataDana = async (danaParam: string, vftkParam: string) => {
     const path = `data?vftk=${encodeURIComponent(vftkParam)}&dana=${encodeURIComponent(danaParam)}`;
 
-    const restOperation = post({
+    const restOperation = get({
       apiName: 'myRestApi',
       path: path,
     });
