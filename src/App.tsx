@@ -14,56 +14,79 @@ function App() {
   const [screen, setScreen] = React.useState<'loading' | 'detector' | 'success' | 'error' | 'notLive' | 'dataError' | 'cancelled'>('loading');
 
   React.useEffect(() => {
-    // Obtener parámetros del URL
-    const params = new URLSearchParams(window.location.search);
-    const vftk = params.get('vftk');
-    const danaParam = params.get('dana');
+    const fetchDataAndProcess = async () => {
+      // Obtener parámetros del URL
+      const params = new URLSearchParams(window.location.search);
+      const vftk = params.get('vftk');
+      const danaParam = params.get('dana');
 
-    if (vftk && danaParam) {
-      //aqui consultos los datos de la persona en DanaConnect
-
-      if (nombre === 'Lorena') {
-        console.log('----hay datos: ');
-        const fetchCreateLiveness = async () => {
-          try {
-            const restOperation = post({
-              apiName: 'myRestApi',
-              path: 'session',
-            });
-            const response = (await restOperation.response) as unknown as Response;
-
-            if (response.body) {
-              const responseBody = await readStream(response.body);
-              const sessionData = JSON.parse(responseBody);
-
-              if (sessionData && sessionData.SessionId) {
-                setCreateLivenessApiData({ sessionId: sessionData.SessionId });
-                setScreen('detector');
-              } else {
-                console.error('Invalid session data received:', sessionData);
-                setScreen('error');
-              }
-              setLoading(false);
-            } else {
-              console.log('POST call succeeded but response body is empty');
-              setScreen('error');
-            }
-          } catch (error) {
-            console.log('------POST call failed: ', error);
-            setScreen('error');
-          }
-        };
-
-        fetchCreateLiveness();
+      if (vftk && danaParam) {
+        //Consultos los datos de la persona en DanaConnect
+        const fetchData = async (danaParam: string) => {
+          const res = await getDataDana(danaParam); // Esperar a que se resuelva la Promise
+          console.log('-------llamo a dana: ', res);
+        }
+        fetchData(danaParam);
+        if (nombre === 'Lorena') {
+          console.log('----hay datos: ');
+          fetchCreateLiveness();
+        } else {
+          setScreen('dataError');
+          setLoading(false);
+        }
       } else {
-        setScreen('dataError');
+        setScreen('error');
         setLoading(false);
       }
-    } else {
-      setScreen('error');
-      setLoading(false);
     }
+    fetchDataAndProcess();
   }, [nombre]);
+
+  const getDataDana = async (danaParam: string) => {
+    const restOperation = get({
+      apiName: 'myRestApi',
+      path: 'data?dana=' + danaParam,
+    });
+    const response = (await restOperation.response) as unknown as Response;
+    if (response.body) {
+      const responseBody = await readStream(response.body);
+      return JSON.parse(responseBody);
+    } else {
+      console.log('GET call succeeded but response body is empty');
+      setScreen('error');
+    }
+  }
+
+
+  const fetchCreateLiveness = async () => {
+    try {
+      const restOperation = post({
+        apiName: 'myRestApi',
+        path: 'session',
+      });
+      const response = (await restOperation.response) as unknown as Response;
+
+      if (response.body) {
+        const responseBody = await readStream(response.body);
+        const sessionData = JSON.parse(responseBody);
+
+        if (sessionData && sessionData.SessionId) {
+          setCreateLivenessApiData({ sessionId: sessionData.SessionId });
+          setScreen('detector');
+        } else {
+          console.error('Invalid session data received:', sessionData);
+          setScreen('error');
+        }
+        setLoading(false);
+      } else {
+        console.log('POST call succeeded but response body is empty');
+        setScreen('error');
+      }
+    } catch (error) {
+      console.log('------POST call failed: ', error);
+      setScreen('error');
+    }
+  };
 
   async function readStream(stream: ReadableStream<Uint8Array>): Promise<string> {
     const reader = stream.getReader();

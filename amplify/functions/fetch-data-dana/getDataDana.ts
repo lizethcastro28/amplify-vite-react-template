@@ -4,7 +4,13 @@ import type { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
 export const getDataDana = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
     console.log('-----------getDataDanaFunction------', event)
     try {
-        //const danaParam = event.requestContext;
+        // Obtener los parámetros de la cadena de consulta
+        const queryStringParameters = event.queryStringParameters;
+        const danaParam = queryStringParameters ? queryStringParameters.dana : null;
+
+        // Aquí puedes usar `danaParam` como lo necesites
+        console.log('------Query String Parameter dana:', danaParam);
+        const responseBody = `Hello from Lambda getDataDana: ${danaParam}`;
 
         return {
             statusCode: 200,
@@ -12,7 +18,7 @@ export const getDataDana = async (event: APIGatewayEvent): Promise<APIGatewayPro
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Headers": "*"
             },
-            body: JSON.stringify('Hello from Lambda getDataDana: ')
+            body: JSON.stringify(responseBody)
         };
     } catch (error: unknown) {
         console.error('Error getDataDana:', error);
