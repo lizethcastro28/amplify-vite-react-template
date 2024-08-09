@@ -6,11 +6,12 @@ export const getDataDana = async (event: APIGatewayEvent): Promise<APIGatewayPro
     try {
         // Obtener los parámetros de la cadena de consulta
         const queryStringParameters = event.queryStringParameters;
+        const vftk = queryStringParameters ? queryStringParameters.vftk : null;
         const danaParam = queryStringParameters ? queryStringParameters.dana : null;
 
         // Aquí puedes usar `danaParam` como lo necesites
         console.log('------Query String Parameter dana:', danaParam);
-        const responseBody = `Hello from Lambda getDataDana: ${danaParam}`;
+        const responseBody = `Hello from Lambda getDataDana: dana= ${danaParam} - vftk=${vftk}`;
 
         return {
             statusCode: 200,
