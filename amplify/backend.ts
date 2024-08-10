@@ -68,28 +68,11 @@ const dataPath = myRestApi.root.addResource("data", {
     authorizationType: AuthorizationType.IAM,
   },
 });
-// add methods you would like to create to the resource path
+dataPath.addMethod("GET", lambdaIntegrationDana);
+dataPath.addMethod("POST", lambdaIntegrationDana);
+
+// Add CORS preflight method if required
 dataPath.addMethod("OPTIONS", lambdaIntegrationDana, {
-  methodResponses: [{
-    statusCode: "200",
-    responseParameters: {
-      "method.response.header.Access-Control-Allow-Origin": true,
-      "method.response.header.Access-Control-Allow-Methods": true,
-      "method.response.header.Access-Control-Allow-Headers": true,
-    },
-  }],
-});
-dataPath.addMethod("GET", lambdaIntegrationDana, {
-  methodResponses: [{
-    statusCode: "200",
-    responseParameters: {
-      "method.response.header.Access-Control-Allow-Origin": true,
-      "method.response.header.Access-Control-Allow-Methods": true,
-      "method.response.header.Access-Control-Allow-Headers": true,
-    },
-  }],
-});
-dataPath.addMethod("POST", lambdaIntegrationDana, {
   methodResponses: [{
     statusCode: "200",
     responseParameters: {
