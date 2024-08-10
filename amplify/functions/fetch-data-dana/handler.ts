@@ -1,6 +1,5 @@
 import type { APIGatewayProxyHandler, APIGatewayProxyResult, APIGatewayEvent } from "aws-lambda";
-import { getDataDana } from './getDataDana'; 
-
+import { getDataDana } from './getDataDana';
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
     const httpMethod = event.httpMethod;
@@ -14,6 +13,10 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayEvent): P
         case "POST":
             response = await getDataDana(event);
             break;
+        case "OPTIONS":
+            // Handle preflight CORS requests
+            response = handlePreflightRequest();
+            break;
         default:
             response = handleUnknownRequest(event);
             break;
@@ -22,13 +25,27 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayEvent): P
     return response;
 };
 
+// Función para manejar solicitudes OPTIONS (preflight CORS)
+const handlePreflightRequest = (): APIGatewayProxyResult => {
+    return {
+        statusCode: 204, // No Content
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+        },
+        body: ""
+    };
+};
+
 // Función para manejar solicitudes desconocidas
 const handleUnknownRequest = (event: APIGatewayEvent): APIGatewayProxyResult => {
     return {
         statusCode: 405, // Método no permitido
         headers: {
             "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Headers": "*",
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
         },
         body: JSON.stringify(`Method ${event.httpMethod} not allowed`),
     };
