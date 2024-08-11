@@ -13,10 +13,6 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayEvent): P
         case "POST":
             response = await getDataDana(event);
             break;
-        case "OPTIONS":
-            // Handle preflight CORS requests
-            response = handlePreflightRequest();
-            break;
         default:
             response = handleUnknownRequest(event);
             break;
