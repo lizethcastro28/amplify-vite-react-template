@@ -25,18 +25,6 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayEvent): P
     return response;
 };
 
-// Función para manejar solicitudes OPTIONS (preflight CORS)
-const handlePreflightRequest = (): APIGatewayProxyResult => {
-    return {
-        statusCode: 204, // No Content
-        headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type",
-        },
-        body: ""
-    };
-};
 
 // Función para manejar solicitudes desconocidas
 const handleUnknownRequest = (event: APIGatewayEvent): APIGatewayProxyResult => {
