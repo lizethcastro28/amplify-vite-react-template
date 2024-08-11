@@ -12,6 +12,7 @@ import { auth } from "./auth/resource";
 import { data } from "./data/resource";
 import { fetchDataDana } from './functions/fetch-data-dana/resource';
 import { myApiFunction } from "./functions/api-function/resource";
+import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 
 const backend = defineBackend({
   auth,
@@ -71,16 +72,11 @@ const dataPath = myRestApi.root.addResource("data", {
 dataPath.addMethod("GET", lambdaIntegrationDana);
 dataPath.addMethod("POST", lambdaIntegrationDana);
 
-// Add CORS preflight method if required
-dataPath.addMethod("OPTIONS", lambdaIntegrationDana, {
-  methodResponses: [{
-    statusCode: "200",
-    responseParameters: {
-      "method.response.header.Access-Control-Allow-Origin": true,
-      "method.response.header.Access-Control-Allow-Methods": true,
-      "method.response.header.Access-Control-Allow-Headers": true,
-    },
-  }],
+// Habilitar CORS
+dataPath.addCorsPreflight({
+  allowOrigins: apigateway.Cors.ALL_ORIGINS,
+  allowMethods: apigateway.Cors.ALL_METHODS,
+  allowHeaders: apigateway.Cors.DEFAULT_HEADERS,
 });
 
 //================create a new Cognito User Pools authorizer
