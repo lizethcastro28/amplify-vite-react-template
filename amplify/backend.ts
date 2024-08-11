@@ -71,13 +71,6 @@ const dataPath = myRestApi.root.addResource("data", {
 dataPath.addMethod("GET", lambdaIntegrationDana);
 dataPath.addMethod("POST", lambdaIntegrationDana);
 
-// Habilitar CORS para el recurso `data` solo una vez
-dataPath.addCorsPreflight({
-  allowOrigins: Cors.ALL_ORIGINS, // Allow all origins
-  allowMethods: Cors.ALL_METHODS, // Allow all methods
-  allowHeaders: Cors.DEFAULT_HEADERS, // Allow all default headers
-});
-
 //================create a new Cognito User Pools authorizer
 const cognitoAuth = new CognitoUserPoolsAuthorizer(apiStack, "CognitoAuth", {
   cognitoUserPools: [backend.auth.resources.userPool],
