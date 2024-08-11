@@ -12,7 +12,6 @@ import { auth } from "./auth/resource";
 import { data } from "./data/resource";
 import { fetchDataDana } from './functions/fetch-data-dana/resource';
 import { myApiFunction } from "./functions/api-function/resource";
-import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 
 const backend = defineBackend({
   auth,
@@ -32,9 +31,9 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
     stageName: "dev",
   },
   defaultCorsPreflightOptions: {
-    allowOrigins: Cors.ALL_ORIGINS, // Restrict this to domains you trust
-    allowMethods: Cors.ALL_METHODS, // Specify only the methods you need to allow
-    allowHeaders: Cors.DEFAULT_HEADERS, // Specify only the headers you need to allow
+    allowOrigins: Cors.ALL_ORIGINS, // Allow all origins
+    allowMethods: Cors.ALL_METHODS, // Allow all methods
+    allowHeaders: Cors.DEFAULT_HEADERS, // Allow all default headers
   },
 });
 
@@ -43,40 +42,40 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
 const lambdaIntegration = new LambdaIntegration(
   backend.myApiFunction.resources.lambda
 );
+
 // create a new resource path with IAM authorization
 const sessionPath = myRestApi.root.addResource("session", {
   defaultMethodOptions: {
     authorizationType: AuthorizationType.IAM,
   },
 });
+
 // add methods you would like to create to the resource path
 sessionPath.addMethod("GET", lambdaIntegration);
 sessionPath.addMethod("POST", lambdaIntegration);
-// add a proxy resource path to the API
-sessionPath.addProxy({
-  anyMethod: true,
-  defaultIntegration: lambdaIntegration,
-});
 
 // ==============Create resource data============
 // create a new Lambda integration
 const lambdaIntegrationDana = new LambdaIntegration(
   backend.fetchDataDana.resources.lambda
 );
+
 // create a new resource path with IAM authorization
 const dataPath = myRestApi.root.addResource("data", {
   defaultMethodOptions: {
     authorizationType: AuthorizationType.IAM,
   },
 });
+
+// add methods you would like to create to the resource path
 dataPath.addMethod("GET", lambdaIntegrationDana);
 dataPath.addMethod("POST", lambdaIntegrationDana);
 
-// Habilitar CORS
+// Habilitar CORS para el recurso `data` solo una vez
 dataPath.addCorsPreflight({
-  allowOrigins: apigateway.Cors.ALL_ORIGINS,
-  allowMethods: apigateway.Cors.ALL_METHODS,
-  allowHeaders: apigateway.Cors.DEFAULT_HEADERS,
+  allowOrigins: Cors.ALL_ORIGINS, // Allow all origins
+  allowMethods: Cors.ALL_METHODS, // Allow all methods
+  allowHeaders: Cors.DEFAULT_HEADERS, // Allow all default headers
 });
 
 //================create a new Cognito User Pools authorizer
@@ -124,7 +123,7 @@ const rekognitionAndS3Policy = new Policy(apiStack, "RekognitionAndS3Policy", {
         "rekognition:StartFaceLivenessSession",
         "rekognition:GetFaceLivenessSessionResults",
       ],
-      resources: ["*"],
+      resources: ["*"], // Consider specifying actual Rekognition resources
     }),
     new PolicyStatement({
       actions: [
@@ -132,7 +131,7 @@ const rekognitionAndS3Policy = new Policy(apiStack, "RekognitionAndS3Policy", {
         "s3:GetObject",
         "s3:DeleteObject",
       ],
-      resources: ["arn:aws:s3:::video-signature3-images/*"],
+      resources: ["arn:aws:s3:::video-signature3-images/*"], // Update to match your bucket
     }),
   ],
 });
@@ -153,15 +152,3 @@ backend.addOutput({
     },
   },
 });
-const livenessStack = backend.createStack("liveness-stack");
-
-const livenessPolicy = new Policy(livenessStack, "LivenessPolicy", {
-  statements: [
-    new PolicyStatement({
-      actions: ["rekognition:StartFaceLivenessSession"],
-      resources: ["*"],
-    }),
-  ],
-});
-backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(livenessPolicy); // allows guest user access
-backend.auth.resources.authenticatedUserIamRole.attachInlinePolicy(livenessPolicy);
