@@ -11,6 +11,11 @@ export const getDataDana = async (event: APIGatewayEvent): Promise<APIGatewayPro
         if (!danaParam) {
             return {
                 statusCode: 400,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+                    'Access-Control-Allow-Headers': '*',
+                },
                 body: JSON.stringify({ error: 'danaParam no está definido' })
             };
         }
@@ -18,6 +23,11 @@ export const getDataDana = async (event: APIGatewayEvent): Promise<APIGatewayPro
         if (!idCompany) {
             return {
                 statusCode: 400,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+                    'Access-Control-Allow-Headers': '*',
+                },
                 body: JSON.stringify({ error: 'idCompany no está definido' })
             };
         }
@@ -31,9 +41,6 @@ export const getDataDana = async (event: APIGatewayEvent): Promise<APIGatewayPro
             path: `/api/1.0/rest/conversation/data/${encodeURIComponent(danaParam)}`,
             method: 'GET',
             headers: {
-                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Content-Type': 'application/json',
                 'Authorization': `Basic ${base64Credentials}`
             }
         };
@@ -64,6 +71,11 @@ export const getDataDana = async (event: APIGatewayEvent): Promise<APIGatewayPro
 
         return {
             statusCode: 200,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+                'Access-Control-Allow-Headers': '*',
+            },
             body: JSON.stringify(body)
         };
 
@@ -80,8 +92,9 @@ export const getDataDana = async (event: APIGatewayEvent): Promise<APIGatewayPro
         return {
             statusCode: 500,
             headers: {
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Headers": "*"
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+                'Access-Control-Allow-Headers': '*',
             },
             body: JSON.stringify({ error: errorMessage })
         };
