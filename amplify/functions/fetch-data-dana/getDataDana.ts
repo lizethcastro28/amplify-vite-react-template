@@ -48,12 +48,14 @@ export const getDataDana = async (event: APIGatewayEvent): Promise<APIGatewayPro
             };
         }
 
-        const secretName = 'accessDana'; // Cambia esto por el nombre de tu secreto
+        const secretName = 'accessDana';
         const secretString = await getSecret(secretName);
+        console.log('==========secretString: ', secretString)
         let user = secretString.replace('idCompany', idCompany);
-        user = user.replace('idCompany', idCompany);
+
+        console.log('==========user: ', user)
         const base64Credentials = Buffer.from(user).toString('base64');
-        
+
         const options = {
             hostname: 'appserv.danaconnect.com',
             path: `/api/1.0/rest/conversation/data/${encodeURIComponent(danaParam)}`,
