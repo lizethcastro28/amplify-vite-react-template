@@ -7,7 +7,7 @@ interface ErrorContentProps {
   razones: string[];
   instrucciones: string;
   visible: boolean;
-  setScreen?: React.Dispatch<React.SetStateAction<'loading' | 'detector' | 'success' | 'error' | 'notLive' | 'dataError' | 'cancelled'>>;
+  setScreen?: React.Dispatch<React.SetStateAction<'loading' | 'detector' | 'success' | 'error' | 'notLive' | 'dataError' | 'cancelled' | 'dataDocument'>>;
 }
 
 export const ErrorContent: React.FC<ErrorContentProps> = ({ titulo, descripcion, razones, instrucciones, visible }) => {

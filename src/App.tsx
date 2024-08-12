@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState, useEffect } from 'react';
 import { FaceLivenessDetector } from '@aws-amplify/ui-react-liveness';
 import { Loader, ThemeProvider } from '@aws-amplify/ui-react';
 import { get, post } from 'aws-amplify/data';
@@ -8,12 +8,45 @@ import { dictionary } from './components/dictionary';
 import { ErrorContent } from './components/ErrorContent';
 
 function App() {
-  const [nombre] = React.useState<string>('Lorena'); // Cambia este valor para probar diferentes escenarios
-  const [loading, setLoading] = React.useState<boolean>(true);
-  const [createLivenessApiData, setCreateLivenessApiData] = React.useState<{ sessionId: string } | null>(null);
-  const [screen, setScreen] = React.useState<'loading' | 'detector' | 'success' | 'error' | 'notLive' | 'dataError' | 'cancelled'>('loading');
+  const [loading, setLoading] = useState<boolean>(true);
+  const [createLivenessApiData, setCreateLivenessApiData] = useState<{ sessionId: string } | null>(null);
+  const [screen, setScreen] = useState<'loading' | 'detector' | 'success' | 'error' | 'notLive' | 'dataError' | 'cancelled' | "dataDocument">('loading');
+  const [address, setAddress] = useState("");
+  const [nombre, setNombre] = useState("");
+  const [dataDana, setDataDana] = useState(null);
+  const [urlshort, setUrlshort] = useState(null);
 
-  React.useEffect(() => {
+
+  //==========0. Obtener Geolocalización del dispositivo
+  const getLocation = () => {
+    if (navigator.geolocation) {
+      console.log('-----navigator.geolocation: ');
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+
+          // Llamada a la API de Nominatim para obtener la dirección
+          try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+            const data = await response.json();
+            const address = data.display_name;
+            setAddress(address);
+          } catch (error) {
+            console.error('Error with reverse geocoding:', error);
+          }
+        },
+        (error) => {
+          console.log(error.message);
+        }
+      );
+    } else {
+      console.log('Geolocation is not supported by this browser.');
+    }
+    return address;
+  };
+
+  //==========1. Comprobación Liveness
+  useEffect(() => {
     const fetchDataAndProcess = async () => {
       // Obtener parámetros del URL
       const params = new URLSearchParams(window.location.search);
@@ -21,17 +54,37 @@ function App() {
       const danaParam = params.get('dana');
 
       if (vftk && danaParam) {
-        //Consultos los datos de la persona en DanaConnect
-        const fetchData = async (danaParam: string, vftk: string) => {
-          const res = await getDataDana(danaParam, vftk); // Esperar a que se resuelva la Promise
-          console.log('-------llamo a dana: ', res);
-        }
-        fetchData(danaParam, vftk);
-        if (nombre === 'Lorena') {
-          console.log('----hay datos: ');
-          fetchCreateLiveness();
-        } else {
-          setScreen('dataError');
+        try {
+          // Consulto los datos de la persona en DanaConnect
+          const fetchData = async (danaParam: string, vftk: string) => {
+            const res = await getDataDana(danaParam, vftk); // Esperar a que se resuelva la Promise
+            console.log('-------llamo a dana: ', res);
+            return res; // Asegúrate de retornar el resultado
+          }
+
+          const data = await fetchData(danaParam, vftk); // Usa await para obtener el resultado de la Promise
+
+          if (data && data.record) {
+            console.log('----hay datos: ');
+            var imageUrl = obtenerValorCampo(data.record, 'URLSHORT');
+            if (imageUrl) {
+              setAddress(getLocation());
+              setNombre(obtenerValorCampo(data.record, 'NOMBRES_Y_APELLIDOS'));
+              setUrlshort(imageUrl);
+              setDataDana(data.record);
+              fetchCreateLiveness();
+            } else {
+              console.log('El urlshort del documento no está en la data');
+              setScreen('dataDocument');
+              setLoading(false);
+            }
+          } else {
+            setScreen('dataError');
+            setLoading(false);
+          }
+        } catch (error) {
+          console.error('Error fetching data:', error);
+          setScreen('error');
           setLoading(false);
         }
       } else {
@@ -39,8 +92,25 @@ function App() {
         setLoading(false);
       }
     }
+
     fetchDataAndProcess();
-  }, [nombre]);
+  }, []);
+
+  //---------Función para encontrar el valor de un campo dado su clave
+  function obtenerValorCampo(objeto: Record<string, any>, campo: string): any {
+    for (const clave in objeto) {
+      if (clave.includes(campo)) {
+        return objeto[clave];
+      } else if (typeof objeto[clave] === "object" && objeto[clave] !== null) {
+        const resultadoRecursivo = obtenerValorCampo(objeto[clave], campo);
+        if (resultadoRecursivo !== undefined) {
+          return resultadoRecursivo;
+        }
+      }
+    }
+    return undefined; // Añadir un valor de retorno para el caso cuando no se encuentra el campo
+  }
+
 
   const getDataDana = async (danaParam: string, vftkParam: string) => {
     const path = `data?vftk=${encodeURIComponent(vftkParam)}&dana=${encodeURIComponent(danaParam)}`;
@@ -170,6 +240,7 @@ function App() {
       ) : screen === 'success' ? (
         <div>
           <h1>Aquí va la comparación contra el Documento</h1>
+          {address}
         </div>
       ) : screen === 'notLive' ? (
         <div>
@@ -187,10 +258,24 @@ function App() {
       ) : screen === 'dataError' ? (
         <div>
           <ErrorContent
-            titulo="Nombre no reconocido"
-            descripcion="El nombre ingresado no es válido para esta operación."
+            titulo="Error en Información"
+            descripcion="Se ha producido un error al cargar la información de su cuenta"
+            razones={[
+              "Puede ser que usted ya haya hecho clic en el enlace para generar y su token ya haya sido utilizado.",
+              "Puede ser que haya pasado más de una hora desde que hizo clic en el link del email."
+            ]}
+            instrucciones="Vuelva a abrir el email original que le enviamos y haga clic en el enlace para generar el token nuevamente"
+            visible={false}
+            setScreen={setScreen}
+          />
+        </div>
+      ) : screen === 'dataDocument' ? (
+        <div>
+          <ErrorContent
+            titulo="Error en Documento"
+            descripcion="No hay documento en su dossier para realizar la verificación"
             razones={[]}
-            instrucciones="Por favor, verifique el nombre ingresado y vuelva a intentarlo."
+            instrucciones="Contacte con Soporte Ténico"
             visible={false}
             setScreen={setScreen}
           />
