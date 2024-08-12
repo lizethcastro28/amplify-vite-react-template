@@ -72,6 +72,7 @@ function App() {
               setNombre(obtenerValorCampo(data.record, 'NOMBRES_Y_APELLIDOS'));
               setUrlshort(imageUrl);
               setDataDana(data.record);
+              console.log('dataaaa:', dataDana)
               fetchCreateLiveness();
             } else {
               console.log('El urlshort del documento no está en la data');
@@ -241,7 +242,6 @@ function App() {
         <div>
           <h1>Aquí va la comparación contra el Documento</h1>
           {address}
-          {dataDana}
           {urlshort}
         </div>
       ) : screen === 'notLive' ? (

@@ -1,8 +1,6 @@
 import type { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
 import https from 'https';
-import AWS from 'aws-sdk';
-
-import { secret } from "@aws-amplify/backend";
+import * as AWS from 'aws-sdk';
 
 const secretsManager = new AWS.SecretsManager();
 
@@ -14,7 +12,7 @@ const getSecret = async (secretName: string): Promise<string> => {
         }
         throw new Error('Secret not found');
     } catch (error) {
-        console.error('Error retrieving secret:', error);
+        console.error('--------Error retrieving secret:', error);
         throw error;
     }
 };
@@ -51,11 +49,11 @@ export const getDataDana = async (event: APIGatewayEvent): Promise<APIGatewayPro
         }
 
         const secretName = 'accessDana';
-        const secreto = secret('secretName');
-        console.log('==========secreto: ', secreto);
         const secretString = await getSecret(secretName);
         console.log('==========secretString: ', secretString);
-        let user = secretString.replace('idCompany', idCompany);
+        //let user = secretString.replace('idCompany', idCompany);
+        let user = 'preventas@idConmany:O8l2EUIut4x0D.JvpQe';
+        user = user.replace('idCompany', idCompany);
 
         console.log('==========user: ', user)
         const base64Credentials = Buffer.from(user).toString('base64');
