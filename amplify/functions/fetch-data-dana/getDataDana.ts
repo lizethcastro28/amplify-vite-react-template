@@ -2,6 +2,8 @@ import type { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
 import https from 'https';
 import AWS from 'aws-sdk';
 
+import { secret } from "@aws-amplify/backend";
+
 const secretsManager = new AWS.SecretsManager();
 
 const getSecret = async (secretName: string): Promise<string> => {
@@ -49,8 +51,10 @@ export const getDataDana = async (event: APIGatewayEvent): Promise<APIGatewayPro
         }
 
         const secretName = 'accessDana';
+        const secreto = secret('secretName');
+        console.log('==========secreto: ', secreto);
         const secretString = await getSecret(secretName);
-        console.log('==========secretString: ', secretString)
+        console.log('==========secretString: ', secretString);
         let user = secretString.replace('idCompany', idCompany);
 
         console.log('==========user: ', user)
