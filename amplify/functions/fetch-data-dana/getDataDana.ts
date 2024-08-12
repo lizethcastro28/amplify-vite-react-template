@@ -1,5 +1,21 @@
 import type { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
 import https from 'https';
+import AWS from 'aws-sdk';
+
+const secretsManager = new AWS.SecretsManager();
+
+const getSecret = async (secretName: string): Promise<string> => {
+    try {
+        const data = await secretsManager.getSecretValue({ SecretId: secretName }).promise();
+        if ('SecretString' in data) {
+            return data.SecretString as string;
+        }
+        throw new Error('Secret not found');
+    } catch (error) {
+        console.error('Error retrieving secret:', error);
+        throw error;
+    }
+};
 
 export const getDataDana = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
     console.log('-----------getDataDanaFunction------', event);
@@ -32,10 +48,12 @@ export const getDataDana = async (event: APIGatewayEvent): Promise<APIGatewayPro
             };
         }
 
-        let user = "preventas@idCompany:O8l2EUIut4x0D.JvpQe";
+        const secretName = 'accessDana'; // Cambia esto por el nombre de tu secreto
+        const secretString = await getSecret(secretName);
+        let user = secretString.replace('idCompany', idCompany);
         user = user.replace('idCompany', idCompany);
-
         const base64Credentials = Buffer.from(user).toString('base64');
+        
         const options = {
             hostname: 'appserv.danaconnect.com',
             path: `/api/1.0/rest/conversation/data/${encodeURIComponent(danaParam)}`,
