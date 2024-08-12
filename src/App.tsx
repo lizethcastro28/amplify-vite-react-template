@@ -241,6 +241,8 @@ function App() {
         <div>
           <h1>Aquí va la comparación contra el Documento</h1>
           {address}
+          {dataDana}
+          {urlshort}
         </div>
       ) : screen === 'notLive' ? (
         <div>
