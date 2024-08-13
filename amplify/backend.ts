@@ -78,6 +78,13 @@ dataPath.addMethod("POST", lambdaIntegrationDana);
 
 // Otorgar permisos a la Lambda para leer el secreto
 secretDana.grantRead(backend.fetchDataDana.resources.lambda);
+// Rol asociado al Lambda
+const lambdaDataRole = backend.myApiFunction.resources.lambda.role as Role;
+// Añadir permisos para Secrets Manager
+lambdaDataRole.addToPolicy(new PolicyStatement({
+  actions: ["secretsmanager:GetSecretValue"],
+  resources: ["arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:accessDana"],
+}));
 
 
 //================create a new Cognito User Pools authorizer
