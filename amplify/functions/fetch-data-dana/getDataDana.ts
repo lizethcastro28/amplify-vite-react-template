@@ -59,7 +59,7 @@ export const getDataDana = async (event: APIGatewayEvent): Promise<APIGatewayPro
 
         const options = {
             hostname: 'appserv.danaconnect.com',
-            path: `/api/1.0/rest/conversation/data/${encodeURIComponent(danaParam)}`,
+            path: `/api/1.0/rest/conversation/data/${danaParam}`,
             method: 'GET',
             headers: {
                 'Authorization': `Basic ${base64Credentials}`
