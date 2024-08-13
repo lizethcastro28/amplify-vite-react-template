@@ -24,7 +24,16 @@ const backend = defineBackend({
 //=============create a new API stack==============
 const apiStack = backend.createStack("api-stack");
 
-// create a new REST API
+// ==============Ref Secret ========================
+// Referenciar un secreto existente
+// Crear el secreto en el Secret Manager
+//const secretDana = Secret.fromSecretNameV2(apiStack, 'secretDana', 'accessDana');
+
+const secretApiDana = new Secret(apiStack, 'secretDana', {
+  secretName: 'accessApiDana'
+});
+
+//==============create a new REST API
 const myRestApi = new RestApi(apiStack, "RestApi", {
   restApiName: "myRestApi",
   deploy: true,
@@ -36,14 +45,6 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
     allowMethods: Cors.ALL_METHODS,
     allowHeaders: Cors.DEFAULT_HEADERS, 
   },
-});
-// ==============Ref Secret ========================
-// Referenciar un secreto existente
-// Crear el secreto en el Secret Manager
-//const secretDana = Secret.fromSecretNameV2(apiStack, 'secretDana', 'accessDana');
-
-const secretApiDana = new Secret(apiStack, 'secretDana', {
-  secretName: 'accessApiDana'
 });
 
 // ==============Create resource session============
@@ -85,7 +86,6 @@ dataPath.addMethod("POST", lambdaIntegrationDana);
 secretApiDana.grantRead(backend.fetchDataDana.resources.lambda);
 // Rol asociado al Lambda
 const lambdaDataRole = backend.fetchDataDana.resources.lambda.role as Role;
-
 lambdaDataRole.addToPolicy(new PolicyStatement({
   actions: ["secretsmanager:GetSecretValue"],
   resources: ["*"],
