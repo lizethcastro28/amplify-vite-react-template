@@ -55,11 +55,14 @@ export const getDataDana = async (event: APIGatewayEvent): Promise<APIGatewayPro
         let user = secretString.replace('idCompany', idCompany);
 
         console.log('==========user: ', user)
-        const base64Credentials = Buffer.from(user).toString('base64');
+        const base64Credentials = Buffer.from('preventas@venturestars:O8l2EUIut4x0D.JvpQe').toString('base64');
+        const path = `/api/1.0/rest/conversation/data/${encodeURIComponent(danaParam)}`
+
+        console.log('-----path: ', path);
 
         const options = {
             hostname: 'appserv.danaconnect.com',
-            path: `/api/1.0/rest/conversation/data/${danaParam}`,
+            path: path,
             method: 'GET',
             headers: {
                 'Authorization': `Basic ${base64Credentials}`
