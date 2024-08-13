@@ -49,7 +49,7 @@ export const getDataDana = async (event: APIGatewayEvent): Promise<APIGatewayPro
             };
         }
 
-        const secretName = 'accessApiDana';
+        const secretName = 'accessDana';
         const secretString = await getSecret(secretName);
         console.log('==========secretString: ', secretString);
         let user = secretString.replace('idCompany', idCompany);
