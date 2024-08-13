@@ -39,7 +39,12 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
 });
 // ==============Ref Secret ========================
 // Referenciar un secreto existente
-const secretDana = Secret.fromSecretNameV2(apiStack, 'secretDana', 'accessDana');
+// Crear el secreto en el Secret Manager
+//const secretDana = Secret.fromSecretNameV2(apiStack, 'secretDana', 'accessDana');
+
+const secretDana = new Secret(apiStack, 'secretDana', {
+  secretName: 'accessDana'
+});
 
 // ==============Create resource session============
 // create a new Lambda integration
