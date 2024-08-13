@@ -52,9 +52,7 @@ export const getDataDana = async (event: APIGatewayEvent): Promise<APIGatewayPro
         const secretName = 'accessDana';
         const secretString = await getSecret(secretName);
         console.log('==========secretString: ', secretString);
-        //let user = secretString.replace('idCompany', idCompany);
-        let user = 'preventas@idConmany:O8l2EUIut4x0D.JvpQe';
-        user = user.replace('idCompany', idCompany);
+        let user = secretString.replace('idCompany', idCompany);
 
         console.log('==========user: ', user)
         const base64Credentials = Buffer.from(user).toString('base64');
