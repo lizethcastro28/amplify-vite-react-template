@@ -79,7 +79,7 @@ dataPath.addMethod("POST", lambdaIntegrationDana);
 // Otorgar permisos a la Lambda para leer el secreto
 secretDana.grantRead(backend.fetchDataDana.resources.lambda);
 // Rol asociado al Lambda
-const lambdaDataRole = backend.myApiFunction.resources.lambda.role as Role;
+const lambdaDataRole = backend.fetchDataDana.resources.lambda.role as Role;
 // Añadir permisos para Secrets Manager
 lambdaDataRole.addToPolicy(new PolicyStatement({
   actions: ["secretsmanager:GetSecretValue"],
