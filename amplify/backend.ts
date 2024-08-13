@@ -26,7 +26,7 @@ const apiStack = backend.createStack("api-stack");
 
 // create a new REST API
 const myRestApi = new RestApi(apiStack, "RestApi", {
-  restApiName: "myRestApi",
+  restApiName: "firmaBiometricaApi",
   deploy: true,
   deployOptions: {
     stageName: "dev",
