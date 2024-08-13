@@ -4,12 +4,18 @@ import * as AWS from 'aws-sdk';
 
 const secretsManager = new AWS.SecretsManager();
 
-const getSecret = async (secretName: string): Promise<string> => {
+const getSecret = async (secretName: string, key: string): Promise<string> => {
     console.log('-------el secreto: ', secretName);
     try {
         const data = await secretsManager.getSecretValue({ SecretId: secretName }).promise();
         if ('SecretString' in data) {
-            return data.SecretString as string;
+            // Parse the SecretString as JSON
+            const secretObject = JSON.parse(data.SecretString as string);
+            // Retrieve the specific value by key
+            if (key in secretObject) {
+                return secretObject[key];
+            }
+            throw new Error(`Key ${key} not found in secret`);
         }
         throw new Error('Secret not found');
     } catch (error) {
@@ -50,19 +56,17 @@ export const getDataDana = async (event: APIGatewayEvent): Promise<APIGatewayPro
         }
 
         const secretName = 'accessDana';
-        const secretString = await getSecret(secretName);
+        const secretKey = 'accessDana';
+        const secretString = await getSecret(secretName, secretKey);
         console.log('==========secretString: ', secretString);
         let user = secretString.replace('idCompany', idCompany);
 
         console.log('==========user: ', user)
-        const base64Credentials = Buffer.from('preventas@venturestars:O8l2EUIut4x0D.JvpQe').toString('base64');
-        const path = `/api/1.0/rest/conversation/data/${encodeURIComponent(danaParam)}`
-
-        console.log('-----path: ', path);
+        const base64Credentials = Buffer.from(user).toString('base64');
 
         const options = {
             hostname: 'appserv.danaconnect.com',
-            path: path,
+            path: `/api/1.0/rest/conversation/data/${encodeURIComponent(danaParam)}`,
             method: 'GET',
             headers: {
                 'Authorization': `Basic ${base64Credentials}`
