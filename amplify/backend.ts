@@ -39,7 +39,7 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
 });
 // ==============Ref Secret ========================
 // Referenciar un secreto existente
-const mySecret = Secret.fromSecretNameV2(apiStack, 'MySecret', 'accessDana');
+const secretDana = Secret.fromSecretNameV2(apiStack, 'secretDana', 'accessDana');
 
 // ==============Create resource session============
 // create a new Lambda integration
@@ -77,7 +77,7 @@ dataPath.addMethod("GET", lambdaIntegrationDana);
 dataPath.addMethod("POST", lambdaIntegrationDana);
 
 // Otorgar permisos a la Lambda para leer el secreto
-mySecret.grantRead(backend.fetchDataDana.resources.lambda);
+secretDana.grantRead(backend.fetchDataDana.resources.lambda);
 
 
 //================create a new Cognito User Pools authorizer

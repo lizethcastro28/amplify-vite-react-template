@@ -5,6 +5,7 @@ import * as AWS from 'aws-sdk';
 const secretsManager = new AWS.SecretsManager();
 
 const getSecret = async (secretName: string): Promise<string> => {
+    console.log('-------el secreto: ', secretName);
     try {
         const data = await secretsManager.getSecretValue({ SecretId: secretName }).promise();
         if ('SecretString' in data) {
