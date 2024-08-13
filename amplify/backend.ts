@@ -42,8 +42,8 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
 // Crear el secreto en el Secret Manager
 //const secretDana = Secret.fromSecretNameV2(apiStack, 'secretDana', 'accessDana');
 
-const secretDana = new Secret(apiStack, 'secretDana', {
-  secretName: 'accessDana'
+const secretApiDana = new Secret(apiStack, 'secretDana', {
+  secretName: 'accessApiDana'
 });
 
 // ==============Create resource session============
@@ -82,7 +82,7 @@ dataPath.addMethod("GET", lambdaIntegrationDana);
 dataPath.addMethod("POST", lambdaIntegrationDana);
 
 // Otorgar permisos a la Lambda para leer el secreto
-secretDana.grantRead(backend.fetchDataDana.resources.lambda);
+secretApiDana.grantRead(backend.fetchDataDana.resources.lambda);
 // Rol asociado al Lambda
 const lambdaDataRole = backend.fetchDataDana.resources.lambda.role as Role;
 
