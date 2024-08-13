@@ -5,7 +5,6 @@ import * as AWS from 'aws-sdk';
 const secretsManager = new AWS.SecretsManager();
 
 const getSecret = async (secretName: string, key: string): Promise<string> => {
-    console.log('-------el secreto: ', secretName);
     try {
         const data = await secretsManager.getSecretValue({ SecretId: secretName }).promise();
         if ('SecretString' in data) {
@@ -58,10 +57,9 @@ export const getDataDana = async (event: APIGatewayEvent): Promise<APIGatewayPro
         const secretName = 'accessDana';
         const secretKey = 'accessDana';
         const secretString = await getSecret(secretName, secretKey);
-        console.log('==========secretString: ', secretString);
+
         let user = secretString.replace('idCompany', idCompany);
 
-        console.log('==========user: ', user)
         const base64Credentials = Buffer.from(user).toString('base64');
 
         const options = {
