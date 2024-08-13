@@ -80,10 +80,10 @@ dataPath.addMethod("POST", lambdaIntegrationDana);
 secretDana.grantRead(backend.fetchDataDana.resources.lambda);
 // Rol asociado al Lambda
 const lambdaDataRole = backend.fetchDataDana.resources.lambda.role as Role;
-// Añadir permisos para Secrets Manager
+
 lambdaDataRole.addToPolicy(new PolicyStatement({
   actions: ["secretsmanager:GetSecretValue"],
-  resources: ["arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:accessDana"],
+  resources: ["*"],
 }));
 
 
